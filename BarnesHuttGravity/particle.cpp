@@ -17,13 +17,15 @@ Particle::Particle(double x_, double y_, double z_, double mass, double acc)
 	this->acceleration = acc;
 }
 
+
+//Getters and setters
+
 void Particle::setLocation(double x_, double y_, double z_)
 {
 	this->x = x_;
 	this->y = y_;
 	this->z = z_;
 }
-
 
 
 double Particle::getX() const
