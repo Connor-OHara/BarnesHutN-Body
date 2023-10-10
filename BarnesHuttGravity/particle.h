@@ -28,13 +28,12 @@ public:
 	//Default Constructors with overloads.
 	Particle(double x_, double y_, double z_, double mass);
 	Particle(double x_, double y_, double z_, double mass, double acc);
-	Particle() : x(0.0), y(0.0), z(0.0), mass(0.0) {};
+	Particle() : x(0.0), y(0.0), z(0.0), mass(0.0), acceleration(0.0) {};
 
 	// Sets the default location 
 	void setLocation(double x_, double y_, double z_);
-	//returns a pointer to an array where arr[0] == x, arr[1] == y, arr[2] == z. Discrete indice for O(1)
-	std::vector<double> getLocation() const;
-
+	
+	
 	//getter and setter for mass
 	void setMass(double mass_);
 	double getMass() const;
@@ -51,7 +50,7 @@ protected:
 	/// <summary>
 	///	Protected attributes.
 	/// </summary>
-	double x, y, z, mass, acceleration;
+	double x, y, z, mass = 1.0, acceleration = 0.0;
 };
 
 #endif 

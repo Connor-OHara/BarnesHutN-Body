@@ -1,18 +1,30 @@
 #include "particle.h"
 
-void Particle::setLocation(double x_, double y_, double z_)
+Particle::Particle(double x_, double y_, double z_, double mass)
 {
-}
-
-void Particle::setMass(double mass_)
-{
+	this->x = x_;
+	this->y = y_;
+	this->z = z_;
 	this->mass = mass;
 }
 
-double Particle::getMass() const
+Particle::Particle(double x_, double y_, double z_, double mass, double acc)
 {
-	return this->mass;
+	this->x = x_;
+	this->y = y_;
+	this->z = z_;
+	this->mass = mass;
+	this->acceleration = acc;
 }
+
+void Particle::setLocation(double x_, double y_, double z_)
+{
+	this->x = x_;
+	this->y = y_;
+	this->z = z_;
+}
+
+
 
 double Particle::getX() const
 {
@@ -28,6 +40,21 @@ double Particle::getZ() const
 {
 	return this->z;
 }
+
+
+
+
+void Particle::setMass(double mass_)
+{
+	this->mass = mass;
+}
+
+double Particle::getMass() const
+{
+	return this->mass;
+}
+
+
 
 void Particle::setAcc(double acc)
 {
