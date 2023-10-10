@@ -36,7 +36,7 @@ public:
 	std::vector<double> getLocation() const;
 
 	//getter and setter for mass
-	void setMass(double mass);
+	void setMass(double mass_);
 	double getMass() const;
 
 	double getX() const;
