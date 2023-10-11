@@ -3,12 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "Vect.h"
-
-
-//psuedocoderef: https://beltoforion.de/en/barnes-hut-galaxy-simulator/
-//This psuedocode was used to help understand the structure of Barnes Hut.
-// I additionally looked at https://www.geeksforgeeks.org/quad-tree/# for quadtree implementation
-
+#include <omp.h>
 
 
 Node::Node()
@@ -28,7 +23,7 @@ Node::Node(const Vect &_UL, const Vect &_LR, Node* parent)
     particleCount = 1;
 }
 
-
+//Getters and setters
 Vect Node::getCent() const
 {
     return this->Cent;
@@ -47,6 +42,11 @@ Vect Node::getLR() const
 Vect Node::getCMass() const
 {
     return this->centerMass;
+}
+
+float Node::getTheta()
+{
+    return this->theta;
 }
 
 void Node::setCent(Vect cent)
@@ -69,8 +69,13 @@ void Node::setCMass(Vect cm)
     this->centerMass = cm;
 }
 
+void Node::setTheta(float _theta)
+{
+    this->theta = _theta;
+}
 
 
+// Find what sub-quadrant our target particle will be placed in relative to the Node
 
 
 
@@ -171,6 +176,7 @@ void Node::Add(Particle newParticle)
         }
 
         _node[quad]->Add(newParticle);
+        this->hasChild = true;
 
     }
     else if (this->particleCount == 1)
@@ -238,15 +244,57 @@ void Node::ComputeMassDistribution()
 	* 
 	*/
 
+    
+
+
+    //You can almost compare this to the balancing algorithm  used by AVL's
 
 
 
+    //* if number of particles in this node equals 1
+    if (this->particleCount == 1)
+    {
+        //Set mass of Node to be that of just our singular particle
+        this->mass = this->Particles.at(0)->getMass();
+        this->centerMass.x = this->Particles.at(0)->getX();
+        this->centerMass.y = this->Particles.at(0)->getY();
+    }
+    else
+    {
+        // More than one particle exists! Need to rebalance trees and  recompute
+        // CM
+        // Compute the center of mass based on the masses of 
+        // all child quadrants and the center of mass as the 
+        // center of mass of the child quadrants weights with 
+        // their mass
+
+        //Find mass of all child masses
+
+        //zero out mass. We will recalculate
+        this->mass = 0;
+        this->centerMass.x = 0;
+        this->centerMass.y = 0;
 
 
+#pragma omp parallel for 
+        for (int i = 0; i < 4; ++i)
+        {
+            if (this->_node[i])
+            {
+                //Recalculate for all subnodes
+                this->_node[i]->ComputeMassDistribution();
+                //compute center of mass and dotal mass
+                this->mass += this->_node[i]->mass;
+                this->centerMass.x += this->_node[i]->centerMass.x * this->_node[i]->mass;
+                this->centerMass.y += this->_node[i]->centerMass.y * this->_node[i]->mass;
+            }
+        }
 
+        //update our new center of mass
+        this->centerMass.x /= this->mass;
+        this->centerMass.y /= this->mass;
 
-
-
+    }
 
 }
 
@@ -254,8 +302,7 @@ void Node::ComputeMassDistribution()
 
 void Node::Destroy()
 {
-    Particles.clear();
-    hasChild = false;
+    
 
     for (unsigned int i = 0; i < 4; i++)
     {
@@ -265,5 +312,16 @@ void Node::Destroy()
         //Corrupt them all
         delete _node[i];
     }
+
+
+    Particles.clear();
+    hasChild = false;
+    this->particleCount = 0;
+    this->mass = 0;
+    this->centerMass = Vect(0.0, 0.0);
+    
+
+    //Reset bounding box
+
 
 }

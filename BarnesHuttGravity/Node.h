@@ -53,11 +53,14 @@ public:
 	Vect getUL() const;
 	Vect getLR() const;
 	Vect getCMass() const;
+	float getTheta();
 
 	void setCent(Vect cent);
 	void setUL(Vect ul);
 	void setLR(Vect lr);
 	void setCMass(Vect cm);
+	void setTheta(float _theta);
+
 
 
 	//Build our tree
@@ -77,5 +80,7 @@ private:
 	* of our Node. This helps us bound our box
 	*/
 	Vect centerMass, UL, LR, Cent;
+
+	float theta;
 };
 #endif
