@@ -142,8 +142,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Vect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vect.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="particle.h" />
   </ItemGroup>

@@ -1,4 +1,9 @@
 #include "Node.h"
+#include <stdexcept>
+#include <stdio.h>
+#include <iostream>
+#include "Vect.h"
+
 
 //psuedocoderef: https://beltoforion.de/en/barnes-hut-galaxy-simulator/
 
@@ -6,32 +11,116 @@
 
 Node::Node()
 {
-    parent = false;
-    depth = 0;
+    hasChild = false;
+    particleCount = 1;
 }
 
-Node::Node(unsigned int currDepth)
+Node::Node(const Vect &_UL, const Vect &_LR, Node* parent)
 {
-    parent = false;
-    depth = currDepth;
+    hasChild = false;
+    mass = 0;
+    centerMass;
+    UL = _UL;
+    LR = _LR;
+    Cent = (_UL.x + (_LR.x - _UL.x) / 2.0, _UL.y + (_LR.y - _UL.y) / 2.0);
+    particleCount = 1;
 }
 
-void Node::Destroy()
+
+Vect Node::getCent() const
 {
-	Particles.clear();
-	parent = false;
-
-	for (unsigned int i = 0; i < childNode.size(); i++)
-	{
-		childNode[i]->Destroy();
-		delete childNode[i];
-	}
-
-	childNode.clear();
-
+    return this->Cent;
 }
 
-void Node::Add()
+Vect Node::getUL() const
+{
+    return this->UL;
+}
+
+Vect Node::getLR() const
+{
+    return this->LR;
+}
+
+Vect Node::getCMass() const
+{
+    return this->centerMass;
+}
+
+void Node::setCent(Vect cent)
+{
+    this->Cent = cent;
+}
+
+void Node::setUL(Vect ul)
+{
+    this->UL = ul;
+}
+
+void Node::setLR(Vect lr)
+{
+    this->LR = lr;
+}
+
+void Node::setCMass(Vect cm)
+{
+    this->centerMass = cm;
+}
+
+
+
+//Returns whether leaf is empty
+bool Node::leafCheck()
+{
+    return  this->_node[0] == nullptr &&
+            this->_node[1] == nullptr &&
+            this->_node[2] == nullptr &&
+            this->_node[3] == nullptr;
+}
+
+
+
+
+Node::Quadrant Node::getQuadrant(double x, double y) const
+{
+    for (unsigned int i = 0; i < this->Particles.size(); ++i)
+    {
+        if (this->Particles.at(i)->getX() < (x + (this->cellWidthX / 2)))
+        {
+
+        }
+    }
+}
+
+
+
+
+/*Create our Subnode. More than one object in tree, so we try and divide up the tree
+* to be smaller. This allows us that fast access time that we love
+*/
+Node* Node::CreateSubNode(Quadrant quad)
+{
+    //Switch creates and returns new Node. Sets the quadrant based off of where the target particle exists
+    switch (quad)
+    {
+    case NE:
+        return new Node(this->Cent, this->LR, this);
+    case NW:
+        return new Node(Vect(this->UL.x, this->Cent.y), Vect(this->Cent.x, this->LR.y), this);
+    case SW:
+        return new Node(this->UL, this->Cent, this);
+    case SE:
+        return new Node(Vect(this->Cent.x, this->LR.y), Vect(this->UL.x, this->Cent.y), this);
+    default:
+        throw std::runtime_error("Cannot Create New Subnode. Quadrant is not set");
+    }
+}
+
+
+
+
+
+void Node::Add(Particle newParticle)
 {
     /*
     * if number of particles in this node > 1
@@ -63,6 +152,31 @@ void Node::Add()
   Increase number of particles
     */
 
+
+    if (this->particleCount > 1)
+    {
+        Node::Quadrant quad = getQuadrant(newParticle.getX(), newParticle.getY());
+
+        //Create a subnode
+        if (!this->_node[quad])
+        {
+            _node[quad] = CreateSubNode(quad);
+        }
+
+        _node[quad]->Add(newParticle);
+
+    }
+    else if (this->particleCount == 1)
+    {
+        int quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
+    }
+    else
+    {
+        this->Particles.push_back(&newParticle);
+    }
+
+
+    this->particleCount += 1;
 
 }
 
@@ -100,5 +214,23 @@ void Node::ComputeMassDistribution()
 
 
 
+
+}
+
+
+
+void Node::Destroy()
+{
+    Particles.clear();
+    hasChild = false;
+
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        //What do I do, Lord?
+        //Destroy the child
+        _node[i]->Destroy();
+        //Corrupt them all
+        delete _node[i];
+    }
 
 }
