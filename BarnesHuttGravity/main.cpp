@@ -21,9 +21,6 @@
 
 
 
-
-
-
 #include <stdio.h>
 #include <omp.h>
 #include <iostream>
@@ -39,6 +36,8 @@ int main(int argc, char** argv)
 		std::cout << "Building Tree";
 
 		//Reset Tree
+
+		//Launch app
 
 
 

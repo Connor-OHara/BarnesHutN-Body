@@ -6,13 +6,8 @@
 #include <omp.h>
 
 
-Node::Node()
-{
-    hasChild = false;
-    particleCount = 1;
-}
 
-Node::Node(const Vect &_UL, const Vect &_LR, Node* parent)
+Node::Node(const Vect &_UL, const Vect &_LR, Node* _parent)
 {
     hasChild = false;
     mass = 0;
@@ -21,6 +16,9 @@ Node::Node(const Vect &_UL, const Vect &_LR, Node* parent)
     LR = _LR;
     Cent = (_UL.x + (_LR.x - _UL.x) / 2.0, _UL.y + (_LR.y - _UL.y) / 2.0);
     particleCount = 1;
+    parent = parent;
+    theta = 1;
+    _node[0] = _node[1] = _node[2] = _node[3] = nullptr;
 }
 
 //Getters and setters
@@ -72,6 +70,11 @@ void Node::setCMass(Vect cm)
 void Node::setTheta(float _theta)
 {
     this->theta = _theta;
+}
+
+bool Node::rootCheck() const
+{
+    return this->parent == nullptr;
 }
 
 
@@ -190,6 +193,7 @@ void Node::Add(Particle newParticle)
 
         //Find the quadrant of already existing particle
         Quadrant quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
+
         //We now subdivide our Node. 
         //Deal with old particle
         if (this->_node[quad] == nullptr)
@@ -244,7 +248,11 @@ void Node::ComputeMassDistribution()
 	* 
 	*/
 
-    
+    /*
+    * 2)  For each subsquare in the quadtree, 
+       compute the center of mass and total mass 
+       for all the particles it contains.
+    */
 
 
     //You can almost compare this to the balancing algorithm  used by AVL's
@@ -297,6 +305,14 @@ void Node::ComputeMassDistribution()
     }
 
 }
+
+
+
+
+
+
+
+
 
 
 

@@ -2,7 +2,7 @@
 
 
 #include <vector>
-#include "particle.cpp"
+#include "particle.h"
 #include "Vect.h"
 
 #ifndef N_NODE
@@ -18,9 +18,8 @@ class Node
 {
 public:
 
-	//Constructors
-	Node();
-	Node(const Vect& UL, const Vect& LR, Node* parent);
+	//Constructor
+	Node(const Vect& UL, const Vect& LR, Node* _parent);
 
 	void Destroy();
 
@@ -33,7 +32,7 @@ public:
 
 	bool hasChild;
 
-	float mass;
+	double mass;
 	unsigned int particleCount = 0;
 
 
@@ -54,6 +53,7 @@ public:
 	Vect getLR() const;
 	Vect getCMass() const;
 	float getTheta();
+	bool rootCheck() const;
 
 	void setCent(Vect cent);
 	void setUL(Vect ul);
@@ -80,7 +80,7 @@ private:
 	* of our Node. This helps us bound our box
 	*/
 	Vect centerMass, UL, LR, Cent;
-
+	Node* parent;
 	float theta;
 };
 #endif

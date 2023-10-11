@@ -1,6 +1,6 @@
 #include "particle.h"
 
-Particle::Particle(double x_, double y_, double z_, double mass)
+Particle::Particle(double x_, double y_, double mass)
 {
 	this->x = x_;
 	this->y = y_;

@@ -4,6 +4,15 @@
 /*
     This class will contain our Node, which itself contains reference
     to the entire BarnesHut tree.
+
+    At a high level, here is the Barnes-Hut algorithm:
+
+   1)  Build the Quadtree, using QuadtreeBuild
+   2)  For each subsquare in the quadtree,
+       compute the center of mass and total mass
+       for all the particles it contains.
+   3)  For each particle, traverse the tree
+       to compute the force on it.
 */
 
 
@@ -23,5 +32,19 @@
 BarnesHut::BarnesHut()
 {
 
+
+
+
+
+
 }
 
+void BarnesHut::quadTreeBuild()
+{
+
+
+    
+
+
+
+}
