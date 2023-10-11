@@ -7,8 +7,6 @@ Description :
 This is the file that defines a Particle. 
 */
 
-
-
 #include <vector>
 
 using namespace std;
@@ -26,12 +24,12 @@ class Particle
 public:
 
 	//Default Constructors with overloads.
-	Particle(double x_, double y_, double z_, double mass);
-	Particle(double x_, double y_, double z_, double mass, double acc);
-	Particle() : x(0.0), y(0.0), z(0.0), mass(0.0), acceleration(0.0) {};
+	Particle(double x_, double y_, double mass);
+	Particle(double x_, double y_, double mass, double acc);
+	Particle() : x(0.0), y(0.0), mass(0.0), acceleration(0.0) {};
 
 	// Sets the default location 
-	void setLocation(double x_, double y_, double z_);
+	void setLocation(double x_, double y_);
 	
 	
 	//getter and setter for mass
@@ -40,7 +38,6 @@ public:
 
 	double getX() const;
 	double getY() const;
-	double getZ() const;
 
 
 	void setAcc(double acc);
@@ -50,7 +47,7 @@ protected:
 	/// <summary>
 	///	Protected attributes.
 	/// </summary>
-	double x, y, z, mass = 1.0, acceleration = 0.0;
+	double x, y, mass = 1.0, acceleration = 0.0;
 };
 
 #endif 

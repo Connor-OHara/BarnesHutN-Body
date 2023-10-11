@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <omp.h>
+#include <iostream>
 
 /*
 * This is the main function that acts as a dispatcher for the subprocesses that will manage 
@@ -18,8 +19,23 @@
 */
 int main(int argc, char** argv) 
 {
+	try
+	{
+		std::cout << "Building Tree";
+
+		//Reset Tree
 
 
 
+	}
+	catch (std::exception& exec)
+	{
+		std::cout << "Error: " << exec.what() << std::endl;
+	}
+	catch (...)
+	{
+		std::cout << "Unknown Error" << std::endl;
+	}
 
+	return 0;
 }

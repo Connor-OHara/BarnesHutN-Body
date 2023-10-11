@@ -4,15 +4,13 @@ Particle::Particle(double x_, double y_, double z_, double mass)
 {
 	this->x = x_;
 	this->y = y_;
-	this->z = z_;
 	this->mass = mass;
 }
 
-Particle::Particle(double x_, double y_, double z_, double mass, double acc)
+Particle::Particle(double x_, double y_, double mass, double acc)
 {
 	this->x = x_;
 	this->y = y_;
-	this->z = z_;
 	this->mass = mass;
 	this->acceleration = acc;
 }
@@ -20,11 +18,10 @@ Particle::Particle(double x_, double y_, double z_, double mass, double acc)
 
 //Getters and setters
 
-void Particle::setLocation(double x_, double y_, double z_)
+void Particle::setLocation(double x_, double y_)
 {
 	this->x = x_;
 	this->y = y_;
-	this->z = z_;
 }
 
 
@@ -37,14 +34,6 @@ double Particle::getY() const
 {
 	return this->y;
 }
-
-double Particle::getZ() const
-{
-	return this->z;
-}
-
-
-
 
 void Particle::setMass(double mass_)
 {
