@@ -6,6 +6,8 @@
 
 
 //psuedocoderef: https://beltoforion.de/en/barnes-hut-galaxy-simulator/
+//This psuedocode was used to help understand the structure of Barnes Hut.
+// I additionally looked at https://www.geeksforgeeks.org/quad-tree/# for quadtree implementation
 
 
 
@@ -69,15 +71,6 @@ void Node::setCMass(Vect cm)
 
 
 
-//Returns whether leaf is empty
-bool Node::leafCheck()
-{
-    return  this->_node[0] == nullptr &&
-            this->_node[1] == nullptr &&
-            this->_node[2] == nullptr &&
-            this->_node[3] == nullptr;
-}
-
 
 
 
@@ -101,6 +94,7 @@ Node::Quadrant Node::getQuadrant(double x, double y) const
     }
     else
     {
+        //return undefined;
         throw std::runtime_error("Wonky Quadrant determination. Not cool bro.");
     }
 }
@@ -181,7 +175,33 @@ void Node::Add(Particle newParticle)
     }
     else if (this->particleCount == 1)
     {
-        int quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
+
+        if ((this->Particles.at(0)->getX() == newParticle.getX()) && (this->Particles.at(0)->getY() == newParticle.getY()))
+        {
+            //Do not place at same point
+            return;
+        }
+
+        //Find the quadrant of already existing particle
+        Quadrant quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
+        //We now subdivide our Node. 
+        //Deal with old particle
+        if (this->_node[quad] == nullptr)
+        {
+            this->_node[quad] = CreateSubNode(quad);
+        }
+        _node[quad]->Add(*this->Particles.at(0));
+
+
+        //insert our new particle
+        if (this->_node[quad] == nullptr)
+        {
+            this->_node[quad] = CreateSubNode(quad);
+        }
+        _node[quad]->Add(newParticle);
+
+
+
     }
     else
     {

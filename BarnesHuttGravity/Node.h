@@ -37,13 +37,6 @@ public:
 	unsigned int particleCount = 0;
 
 
-
-	float cellWidthX, cellWidthY;
-
-
-
-	
-
 	//enumerate our quadrants, 0 indexed
 	enum Quadrant
 	{
@@ -66,9 +59,6 @@ public:
 	void setLR(Vect lr);
 	void setCMass(Vect cm);
 
-
-	//Is leaf?
-	bool leafCheck();
 
 	//Build our tree
 	void Add(Particle particle);
