@@ -83,12 +83,25 @@ bool Node::leafCheck()
 
 Node::Quadrant Node::getQuadrant(double x, double y) const
 {
-    for (unsigned int i = 0; i < this->Particles.size(); ++i)
+    if (x >= this->Cent.x && y >= this->Cent.y)
     {
-        if (this->Particles.at(i)->getX() < (x + (this->cellWidthX / 2)))
-        {
-
-        }
+        return NE;
+    }
+    else if (x <= this->Cent.x && y >= this->Cent.y)
+    {
+        return NW;
+    }
+    else if (x <= this->Cent.y && y <= this->Cent.y)
+    {
+        return SW;
+    }
+    else if (x >= this->Cent.x && y <= this->Cent.y)
+    {
+        return SE;
+    }
+    else
+    {
+        throw std::runtime_error("Wonky Quadrant determination. Not cool bro.");
     }
 }
 
