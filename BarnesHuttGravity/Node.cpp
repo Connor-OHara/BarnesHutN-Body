@@ -4,7 +4,7 @@
 #include <iostream>
 #include "Vect.h"
 #include <omp.h>
-
+#include <cmath>
 
 
 Node::Node(const Vect &_UL, const Vect &_LR, Node* _parent)
@@ -305,9 +305,117 @@ void Node::ComputeMassDistribution()
     }
 
 }
+/*
+Vect Node::calAccel(Particle part1, Particle part2)
+{
+    return ;
+}
+
+*/
 
 
 
+
+
+
+
+
+
+
+
+
+Vect Node::CalcForce(Particle _part)
+{
+    //psuedocode from: https://people.eecs.berkeley.edu/~demmel/cs267/lecture26/lecture26.html#link_4
+    /*Here is the algorithm for step 3 of Barnes-Hut:
+
+      ... For each particle, traverse the tree 
+      ... to compute the force on it.
+      For i = 1 to n
+          f(i) = TreeForce(i,root)   
+      end for
+
+      function f = TreeForce(i,n)
+          ... Compute gravitational force on particle i 
+          ... due to all particles in the box at n
+          f = 0
+          if n contains one particle
+              f = force computed using formula (*) above
+          else 
+              r = distance from particle i to 
+                     center of mass of particles in n
+              D = size of box n
+              if D/r < theta
+                  compute f using formula (*) above
+              else
+                  for all children c of n
+                      f = f + TreeForce(i,c)
+                  end for
+              end if
+          end if
+    */
+
+    //return acceleration vector
+    Vect retForce;
+
+    if (this->particleCount == 1)
+    {
+        //retForce = calAccel(_part, *this->Particles.at(0));
+        double radius = sqrt((_part.getX() - this->Particles.at(0)->getX()) * (_part.getX() - this->Particles.at(0)->getX()) + 
+            (_part.getY() - this->Particles.at(0)->getY()) * (_part.getY() - this->Particles.at(0)->getY()));
+        //compute f using formula
+        double force = G * this->mass / (radius * radius * radius);
+
+        //this->Particles.at(0)->setAccX(force * (this->centerMass.x - _part.getX()));
+        //this->Particles.at(0)->setAccY(force * (this->centerMass.y - _part.getY()));
+        retForce.x = force * (this->centerMass.x - _part.getX());
+        retForce.y = force * (this->centerMass.y - _part.getY());
+
+
+
+    }
+    else
+    {
+        //r = distance from particle i to center of mass of particles in n
+        double radius = sqrt((_part.getX() - this->centerMass.x) * (_part.getX() - this->centerMass.x) + (_part.getY() - this->centerMass.y) * (_part.getY() - this->centerMass.y));
+
+        //D = size of box n
+        double D = this->UL.x - this->LR.x;
+
+        //if D/r < theta (our balancing factor)
+        //Are we too close to each other for our approximation?
+        if (D / radius <= this->theta)
+        {
+            //compute f using formula
+            double force = G * this->mass / (radius * radius * radius);
+
+            //this->Particles.at(0)->setAccX(force * (this->centerMass.x - _part.getX()));
+            //this->Particles.at(0)->setAccY(force * (this->centerMass.y - _part.getY()));
+            retForce.x = force * (this->centerMass.x - _part.getX());
+            retForce.y = force * (this->centerMass.y - _part.getY());
+
+        }
+        else
+        {
+            Vect returnBuffer;
+            //for all children c of n
+#pragma omp parallel for 
+            for (int i = 0; i < 4; ++i) 
+            {
+                //f = f + TreeForce(i,c)
+                returnBuffer = _node[i]->CalcForce(_part);
+
+                retForce.x += returnBuffer.x;
+                retForce.y += returnBuffer.y;
+                
+
+            }
+        }
+
+    }
+
+    return retForce;
+}
 
 
 

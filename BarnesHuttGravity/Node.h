@@ -70,8 +70,17 @@ public:
 	//Get quadrant helper for Add(Particle particle)
 	Node::Quadrant getQuadrant(double x, double y) const;
 
+	//Compute Force and Acceleration for particles in node
+	Vect CalcForce(Particle part);
+	//Vect calAccel(Particle part1, Particle part2);
+
 	//Create a new subnode
 	Node* CreateSubNode(Quadrant quad);
+
+
+
+	//Gravitational Constant
+	static constexpr double G = 6.67428e-11;
 
 
 private:

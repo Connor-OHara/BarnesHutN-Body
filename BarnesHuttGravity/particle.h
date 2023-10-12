@@ -25,8 +25,8 @@ public:
 
 	//Default Constructors with overloads.
 	Particle(double x_, double y_, double mass);
-	Particle(double x_, double y_, double mass, double acc);
-	Particle() : x(0.0), y(0.0), mass(0.0), acceleration(0.0) {};
+	Particle(double x_, double y_, double mass, double accX, double accY);
+	Particle() : x(0.0), y(0.0), mass(0.0), accelerationX(0.0), accelerationY(0.0) {};
 
 	// Sets the default location 
 	void setLocation(double x_, double y_);
@@ -40,14 +40,17 @@ public:
 	double getY() const;
 
 
-	void setAcc(double acc);
-	double getAcc();
+	void setAccX(double acc);
+	void setAccY(double acc);
+	double getAccX();
+	double getAccY();
+
 
 protected:
 	/// <summary>
 	///	Protected attributes.
 	/// </summary>
-	double x, y, mass = 1.0, acceleration = 0.0;
+	double x, y, mass = 1.0, accelerationX = 0.0, accelerationY = 0.0;
 };
 
 #endif 

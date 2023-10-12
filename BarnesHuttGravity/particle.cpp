@@ -7,12 +7,13 @@ Particle::Particle(double x_, double y_, double mass)
 	this->mass = mass;
 }
 
-Particle::Particle(double x_, double y_, double mass, double acc)
+Particle::Particle(double x_, double y_, double mass, double accX, double accY)
 {
 	this->x = x_;
 	this->y = y_;
 	this->mass = mass;
-	this->acceleration = acc;
+	this->accelerationX = accX;
+	this->accelerationY = accY;
 }
 
 
@@ -47,12 +48,22 @@ double Particle::getMass() const
 
 
 
-void Particle::setAcc(double acc)
+void Particle::setAccX(double acc)
 {
-	this->acceleration = acc;
+	this->accelerationX = acc;
 }
 
-double Particle::getAcc()
+void Particle::setAccY(double acc)
 {
-	return this->acceleration;
+	this->accelerationY = acc;
+}
+
+double Particle::getAccX()
+{
+	return this->accelerationX;
+}
+
+double Particle::getAccY()
+{
+	return this->accelerationY;
 }
