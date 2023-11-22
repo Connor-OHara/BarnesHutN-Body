@@ -39,6 +39,10 @@ public:
 	double getX() const;
 	double getY() const;
 
+	// Define the equality operator
+	bool operator==(const Particle& other) const {
+		return (getX() == other.getX()) && (getY() == other.getY());
+	}
 
 	void setAccX(double acc);
 	void setAccY(double acc);

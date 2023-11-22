@@ -4,6 +4,7 @@
 #include <vector>
 #include "particle.h"
 #include "Vect.h"
+#include <memory>
 
 #ifndef N_NODE
 #define N_NODE
@@ -23,7 +24,8 @@ public:
 
 	void Destroy();
 
-	std::vector<Particle*> Particles;
+	std::vector<std::shared_ptr<Particle>> Particles;
+
 	//Each node will have at most 4 childen, one for each quadrant.
 	//If upraded to Octree... you can see how it grows
 	//Node pointers for our subnodes
@@ -64,7 +66,7 @@ public:
 
 
 	//Build our tree
-	void Add(Particle particle);
+	void Add(std::shared_ptr<Particle> newParticle);
 	//Compute our Center of Node Mass
 	void ComputeMassDistribution();
 	//Get quadrant helper for Add(Particle particle)
@@ -77,7 +79,7 @@ public:
 	//Create a new subnode
 	Node* CreateSubNode(Quadrant quad);
 
-
+	static Node* root;
 
 	//Gravitational Constant
 	static constexpr double G = 6.67428e-11;

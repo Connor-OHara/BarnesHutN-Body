@@ -5,19 +5,19 @@
 #include "Vect.h"
 #include <omp.h>
 #include <cmath>
+#include <math.h>
+#define _USE_MATH_DEFINES
 
+Node* Node::root = nullptr;
 
-Node::Node(const Vect &_UL, const Vect &_LR, Node* _parent)
+Node::Node(const Vect &_UL, const Vect &_LR, Node* _parent) : UL(_UL), LR(_LR), parent(_parent), theta(1.0) 
 {
     hasChild = false;
     mass = 0;
-    centerMass;
-    UL = _UL;
-    LR = _LR;
-    Cent = (_UL.x + (_LR.x - _UL.x) / 2.0, _UL.y + (_LR.y - _UL.y) / 2.0);
-    particleCount = 1;
-    parent = parent;
-    theta = 1;
+    centerMass = Vect(0.0, 0.0);
+    Cent.x = (_UL.x + (_LR.x - _UL.x) / 2.0);
+    Cent.y = (_UL.y + (_LR.y - _UL.y) / 2.0);
+    particleCount = 0;
     _node[0] = _node[1] = _node[2] = _node[3] = nullptr;
 }
 
@@ -103,7 +103,7 @@ Node::Quadrant Node::getQuadrant(double x, double y) const
     else
     {
         //return undefined;
-        throw std::runtime_error("Wonky Quadrant determination. Not cool bro.");
+        throw std::runtime_error("Wonky Quadrant determination during GetQuadrant(x,y) call. ");
     }
 }
 
@@ -115,7 +115,7 @@ Node::Quadrant Node::getQuadrant(double x, double y) const
 */
 Node* Node::CreateSubNode(Quadrant quad)
 {
-    //Switch creates and returns new Node. Sets the quadrant based off of where the target particle exists
+    //Switch creates and returns a new Node. Sets the quadrant based on where the target particle exists
     switch (quad)
     {
     case NE:
@@ -131,17 +131,11 @@ Node* Node::CreateSubNode(Quadrant quad)
     }
 }
 
-
-
-
-
-void Node::Add(Particle newParticle)
-{
-    /*
+/*
     * if number of particles in this node > 1
   {
     quad = GetQuadrant(newParticle);
-    
+
     if subnode(quad) does not exist
       create subnode(quad)
 
@@ -166,62 +160,99 @@ void Node::Add(Particle newParticle)
 
   Increase number of particles
     */
+void Node::Add(std::shared_ptr<Particle> newParticle)
+{
+    // Set the minimum separation distance for collision resolution
+    const double minSeparation = 1.0; // Adjust as needed
 
 
-    if (this->particleCount > 1)
+
+    
+    /*
+    if (this->particleCount > 0)
     {
-        Node::Quadrant quad = getQuadrant(newParticle.getX(), newParticle.getY());
-
-        //Create a subnode
-        if (!this->_node[quad])
+        for (const auto& existingParticle : Particles)
         {
-            _node[quad] = CreateSubNode(quad);
-        }
+            double dx = newParticle.getX() - existingParticle->getX();
+            double dy = newParticle.getY() - existingParticle->getY();
+            double distance = std::sqrt(dx * dx + dy * dy);
 
-        _node[quad]->Add(newParticle);
-        this->hasChild = true;
+            if (distance < minSeparation)
+            {
+                // Handle the collision by displacing the new particle
+                double angle = std::rand() / static_cast<double>(RAND_MAX) * 2.0 * 3.14159265358979323846;
+                double displacement = minSeparation - distance;
+                double displacementX = std::cos(angle) * displacement;
+                double displacementY = std::sin(angle) * displacement;
+
+                newParticle.setLocation(newParticle.getX() + displacementX, newParticle.getY() + displacementY);
+            }
+        }
+    }
+    */
+    if (particleCount == 0) {
+        Particles.push_back(newParticle);
+        mass = newParticle->getMass();
+        particleCount = 1;
+        
+
+        // Print ROOT AT only when a new root node is created
+        //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
 
     }
-    else if (this->particleCount == 1)
-    {
-
-        if ((this->Particles.at(0)->getX() == newParticle.getX()) && (this->Particles.at(0)->getY() == newParticle.getY()))
-        {
-            //Do not place at same point
+    else if (particleCount == 1) {
+        if (*Particles.at(0) == *newParticle) {
+            std::cout << "Point Collision During Add At X:" << newParticle->getX() << " Y:" << newParticle->getY() << std::endl;
             return;
         }
 
-        //Find the quadrant of already existing particle
+        // Determine the quadrant for the existing particle (this->Particles.at(0)):
         Quadrant quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
-
-        //We now subdivide our Node. 
-        //Deal with old particle
-        if (this->_node[quad] == nullptr)
-        {
-            this->_node[quad] = CreateSubNode(quad);
+        // Check if the corresponding subnode for the quadrant exists:
+        if (_node[quad] == nullptr) {
+            // If the subnode doesn't exist, create a new subnode for the quadrant:
+            _node[quad] = CreateSubNode(quad);
         }
-        _node[quad]->Add(*this->Particles.at(0));
+        // Recursively add the existing particle to the appropriate subnode:
+        _node[quad]->Add(this->Particles.at(0));
 
-
-        //insert our new particle
-        if (this->_node[quad] == nullptr)
-        {
-            this->_node[quad] = CreateSubNode(quad);
+        // Determine the quadrant for the new particle (newParticle):
+        quad = getQuadrant(newParticle->getX(), newParticle->getY());
+        // Check if the corresponding subnode for the quadrant exists:
+        if (_node[quad] == nullptr) {
+            // If the subnode doesn't exist, create a new subnode for the quadrant:
+            _node[quad] = CreateSubNode(quad);
         }
+        // Recursively add the new particle to the appropriate subnode:
         _node[quad]->Add(newParticle);
 
 
+        // Check if we are transitioning from 0 to 1 particle
+        if (_node[quad] == nullptr) {
+            // Print ROOT AT only when a new root node is created
+            //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
+        }
 
+
+        particleCount = 2; // Update particle count after adding both particles
+
+        // Print ROOT AT only when a new root node is created
+        //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
     }
-    else
-    {
-        this->Particles.push_back(&newParticle);
+    else if (particleCount > 1) {
+        Quadrant quad = getQuadrant(newParticle->getX(), newParticle->getY());
+        if (_node[quad] == nullptr) {
+            _node[quad] = CreateSubNode(quad);
+        }
+        _node[quad]->Add(newParticle);
+        particleCount += 1;
     }
 
-
-    this->particleCount += 1;
-
+    if (parent) {
+        parent->mass += newParticle->getMass();
+    }
 }
+
 
 void Node::ComputeMassDistribution()
 {
@@ -435,9 +466,10 @@ void Node::Destroy()
         _node[i]->Destroy();
         //Corrupt them all
         delete _node[i];
+        _node[i] = nullptr;
     }
 
-
+    // Reset metadata
     Particles.clear();
     hasChild = false;
     this->particleCount = 0;
@@ -446,6 +478,7 @@ void Node::Destroy()
     
 
     //Reset bounding box
+
 
 
 }
