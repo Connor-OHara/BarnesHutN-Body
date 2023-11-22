@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+BarnesHuttGravity/BarnesHuttGravity.vcxproj
+BarnesHuttGravity/BarnesHuttGravity.vcxproj.filters

@@ -18,14 +18,15 @@
 
 
 */
-
+#define _USE_MATH_DEFINES
 
 
 #include <stdio.h>
 #include <omp.h>
 #include <iostream>
-#include "Node.h"
 #include <iomanip>
+#include <cmath>
+#include "Node.h"
 
 
 
@@ -33,7 +34,7 @@
 * This is the main function that acts as a dispatcher for the subprocesses that will manage 
 * The running of the simulation. 
 */
-int main(int argc, char** argv) {
+int main() {
     try {
         std::cout << "Building Tree\n";
 
@@ -43,36 +44,30 @@ int main(int argc, char** argv) {
 
         std::cout << std::fixed << std::setprecision(2);
 
-        auto rootpart  = std::make_shared<Particle>(45.0, 2.0, 100.0);
-        auto rootpart2 = std::make_shared<Particle>(0.0, 6.0, 50.0);
-        auto rootpart3 = std::make_shared<Particle>(2.0, 3.0, 75.0);
+        // Create a galaxy-like dataset of points
+        const int numPoints = 1000000;
+        const double centerX = 50.0;
+        const double centerY = 50.0;
+        const double galaxyRadius = 100.0;
 
-        std::cout << "Rootpart: X: " << std::fixed << std::setprecision(2) << rootpart->getX() << " Y: " << rootpart->getY() << std::endl;
-        std::cout << "Rootpart2: X: " << std::fixed << std::setprecision(2) << rootpart2->getX() << " Y: " << rootpart2->getY() << std::endl;
-        std::cout << "Rootpart3: X: " << std::fixed << std::setprecision(2) << rootpart3->getX() << " Y: " << rootpart3->getY() << std::endl;
+        for (int i = 0; i < numPoints; ++i) {
+            double angle = 2.0 * M_PI * static_cast<double>(i) / numPoints;
+            double radius = galaxyRadius * static_cast<double>(i) / numPoints;
 
+            double x = centerX + radius * std::cos(angle);
+            double y = centerY + radius * std::sin(angle);
 
+            auto particle = std::make_shared<Particle>(x, y, 10.0); // Adjust mass as needed
+            rootNode.Add(particle);
+        }
 
-        std::cout << "Particle Count: " <<  rootNode.particleCount << std::endl;
+        // Print the details of the galaxy particles
+        std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
 
-        rootNode.Add(rootpart);
+        // Print final details
         double rootMass = rootNode.mass;
-
         std::cout << "Root Mass: " << rootMass << std::endl;
         std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
-
-        rootNode.Add(rootpart2);
-        rootMass = rootNode.mass;
-
-        std::cout << "Root Mass: " << rootMass << std::endl;
-        std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
-
-        rootNode.Add(rootpart3);
-
-        std::cout << "Root Mass: " << rootNode.mass << std::endl;
-        std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
-
-
     }
     catch (const std::exception& exec) {
         std::cout << "Error: " << exec.what() << std::endl;

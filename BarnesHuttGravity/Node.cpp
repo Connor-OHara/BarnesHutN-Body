@@ -6,7 +6,12 @@
 #include <omp.h>
 #include <cmath>
 #include <math.h>
+#include <stack>
 #define _USE_MATH_DEFINES
+
+
+static const double minBoxSize = 0.1;  // Adjust this value as needed
+
 
 Node* Node::root = nullptr;
 
@@ -92,7 +97,7 @@ Node::Quadrant Node::getQuadrant(double x, double y) const
     {
         return NW;
     }
-    else if (x <= this->Cent.y && y <= this->Cent.y)
+    else if (x <= this->Cent.x && y <= this->Cent.y)
     {
         return SW;
     }
@@ -114,7 +119,17 @@ Node::Quadrant Node::getQuadrant(double x, double y) const
 * to be smaller. This allows us that fast access time that we love
 */
 Node* Node::CreateSubNode(Quadrant quad)
+
 {
+
+
+    // Check bounding box size before creating a new subnode
+    double boxSize = std::max((LR.x - UL.x), (LR.y - UL.y));
+    if (boxSize < minBoxSize) {
+        return nullptr; // Do not create further subnodes
+    }
+
+
     //Switch creates and returns a new Node. Sets the quadrant based on where the target particle exists
     switch (quad)
     {
@@ -162,11 +177,8 @@ Node* Node::CreateSubNode(Quadrant quad)
     */
 void Node::Add(std::shared_ptr<Particle> newParticle)
 {
-    // Set the minimum separation distance for collision resolution
-    const double minSeparation = 1.0; // Adjust as needed
-
-
-
+    std::stack<Node*> stack;
+    stack.push(this);
     
     /*
     if (this->particleCount > 0)
@@ -190,66 +202,75 @@ void Node::Add(std::shared_ptr<Particle> newParticle)
         }
     }
     */
-    if (particleCount == 0) {
-        Particles.push_back(newParticle);
-        mass = newParticle->getMass();
-        particleCount = 1;
-        
 
-        // Print ROOT AT only when a new root node is created
-        //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
+    while (!stack.empty()) {
+        Node* currentNode = stack.top();
+        stack.pop();
 
-    }
-    else if (particleCount == 1) {
-        if (*Particles.at(0) == *newParticle) {
-            std::cout << "Point Collision During Add At X:" << newParticle->getX() << " Y:" << newParticle->getY() << std::endl;
-            return;
+
+        if (currentNode == nullptr) {
+            // Handle the case where currentNode is null
+            continue;
         }
 
-        // Determine the quadrant for the existing particle (this->Particles.at(0)):
-        Quadrant quad = getQuadrant(this->Particles.at(0)->getX(), this->Particles.at(0)->getY());
-        // Check if the corresponding subnode for the quadrant exists:
-        if (_node[quad] == nullptr) {
-            // If the subnode doesn't exist, create a new subnode for the quadrant:
-            _node[quad] = CreateSubNode(quad);
+
+        if (currentNode->particleCount == 0) {
+            currentNode->Particles.push_back(newParticle);
+            currentNode->mass = newParticle->getMass();
+            currentNode->particleCount = 1;
+
+
+            // Print ROOT AT only when a new root node is created
+            //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
+
         }
-        // Recursively add the existing particle to the appropriate subnode:
-        _node[quad]->Add(this->Particles.at(0));
+        else if (currentNode->particleCount == 1) {
+            if (*Particles.at(0) == *newParticle) {
+                std::cout << "Point Collision During Add At X:" << newParticle->getX() << " Y:" << newParticle->getY() << std::endl;
+                return;
+            }
 
-        // Determine the quadrant for the new particle (newParticle):
-        quad = getQuadrant(newParticle->getX(), newParticle->getY());
-        // Check if the corresponding subnode for the quadrant exists:
-        if (_node[quad] == nullptr) {
-            // If the subnode doesn't exist, create a new subnode for the quadrant:
-            _node[quad] = CreateSubNode(quad);
-        }
-        // Recursively add the new particle to the appropriate subnode:
-        _node[quad]->Add(newParticle);
+            // Determine the quadrant for the existing particle (this->Particles.at(0)):
+            Quadrant quad = currentNode->getQuadrant(currentNode->Particles.at(0)->getX(), currentNode->Particles.at(0)->getY());
+            // Check if the corresponding subnode for the quadrant exists:
+            if (currentNode->_node[quad] == nullptr) {
+                // If the subnode doesn't exist, create a new subnode for the quadrant:
+                currentNode->_node[quad] = currentNode->CreateSubNode(quad);
+            }
+            // Recursively add the existing particle to the appropriate subnode:
+            currentNode->_node[quad]->Add(currentNode->Particles.at(0));
+
+            // Determine the quadrant for the new particle (newParticle):
+            quad = currentNode->getQuadrant(newParticle->getX(), newParticle->getY());
+            // Check if the corresponding subnode for the quadrant exists:
+            if (currentNode->_node[quad] == nullptr) {
+                // If the subnode doesn't exist, create a new subnode for the quadrant:
+                currentNode->_node[quad] = currentNode->CreateSubNode(quad);
+            }
+            // Recursively add the new particle to the appropriate subnode:
+            currentNode->_node[quad]->Add(newParticle);
 
 
-        // Check if we are transitioning from 0 to 1 particle
-        if (_node[quad] == nullptr) {
+            currentNode->particleCount = 2; // Update particle count after adding both particles
+
             // Print ROOT AT only when a new root node is created
             //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
         }
-
-
-        particleCount = 2; // Update particle count after adding both particles
-
-        // Print ROOT AT only when a new root node is created
-        //std::cout << "ROOT AT X:" << Particles.at(0)->getX() << " Y:" << Particles.at(0)->getY() << std::endl;
-    }
-    else if (particleCount > 1) {
-        Quadrant quad = getQuadrant(newParticle->getX(), newParticle->getY());
-        if (_node[quad] == nullptr) {
-            _node[quad] = CreateSubNode(quad);
+        else if (particleCount > 1) {
+            Quadrant quad = currentNode->getQuadrant(newParticle->getX(), newParticle->getY());
+            if (currentNode->_node[quad] == nullptr) {
+                currentNode->_node[quad] = currentNode->CreateSubNode(quad);
+            }
+            currentNode->_node[quad]->Add(newParticle);
+            currentNode->particleCount += 1;
         }
-        _node[quad]->Add(newParticle);
-        particleCount += 1;
-    }
 
-    if (parent) {
-        parent->mass += newParticle->getMass();
+        if (currentNode->parent) {
+            currentNode->parent->mass += newParticle->getMass();
+            // Also update the center of mass for the parent
+            currentNode->parent->centerMass.x += newParticle->getX() * newParticle->getMass();
+            currentNode->parent->centerMass.y += newParticle->getY() * newParticle->getMass();
+        }
     }
 }
 
@@ -288,61 +309,65 @@ void Node::ComputeMassDistribution()
 
     //You can almost compare this to the balancing algorithm  used by AVL's
 
+    std::stack<Node*> stack;
+    stack.push(this);
 
+    while (!stack.empty()) {
+        Node* currentNode = stack.top();
+        stack.pop();
 
-    //* if number of particles in this node equals 1
-    if (this->particleCount == 1)
-    {
-        //Set mass of Node to be that of just our singular particle
-        this->mass = this->Particles.at(0)->getMass();
-        this->centerMass.x = this->Particles.at(0)->getX();
-        this->centerMass.y = this->Particles.at(0)->getY();
-    }
-    else
-    {
-        // More than one particle exists! Need to rebalance trees and  recompute
-        // CM
-        // Compute the center of mass based on the masses of 
-        // all child quadrants and the center of mass as the 
-        // center of mass of the child quadrants weights with 
-        // their mass
-
-        //Find mass of all child masses
-
-        //zero out mass. We will recalculate
-        this->mass = 0;
-        this->centerMass.x = 0;
-        this->centerMass.y = 0;
-
-
-#pragma omp parallel for 
-        for (int i = 0; i < 4; ++i)
+        if (currentNode->particleCount == 1)
         {
-            if (this->_node[i])
-            {
-                //Recalculate for all subnodes
-                this->_node[i]->ComputeMassDistribution();
-                //compute center of mass and dotal mass
-                this->mass += this->_node[i]->mass;
-                this->centerMass.x += this->_node[i]->centerMass.x * this->_node[i]->mass;
-                this->centerMass.y += this->_node[i]->centerMass.y * this->_node[i]->mass;
-            }
+            currentNode->mass = currentNode->Particles.at(0)->getMass();
+            currentNode->centerMass.x = currentNode->Particles.at(0)->getX();
+            currentNode->centerMass.y = currentNode->Particles.at(0)->getY();
         }
+        else
+        {
+            // More than one particle exists! Need to rebalance trees and  recompute
+            // CM
+            // Compute the center of mass based on the masses of 
+            // all child quadrants and the center of mass as the 
+            // center of mass of the child quadrants weights with 
+            // their mass
 
-        //update our new center of mass
-        this->centerMass.x /= this->mass;
-        this->centerMass.y /= this->mass;
+            //Find mass of all child masses
 
+            //zero out mass. We will recalculate
+            currentNode->mass = 0;
+            currentNode->centerMass.x = 0;
+            currentNode->centerMass.y = 0;
+
+#pragma omp parallel for reduction(+:currentNode->mass, currentNode->centerMass.x, currentNode->centerMass.y)
+            for (int i = 0; i < 4; ++i)
+            {
+                if (currentNode->_node[i])
+                {
+                    //Recalculate for all subnodes
+                    currentNode->_node[i]->ComputeMassDistribution();
+                    //compute center of mass and dotal mass
+                    currentNode->mass += currentNode->_node[i]->mass;
+                    currentNode->centerMass.x += currentNode->_node[i]->centerMass.x * currentNode->_node[i]->mass;
+                    currentNode->centerMass.y += currentNode->_node[i]->centerMass.y * currentNode->_node[i]->mass;
+                }
+            }
+
+            //update our new center of mass
+            currentNode->centerMass.x /= currentNode->mass;
+            currentNode->centerMass.y /= currentNode->mass;
+
+
+
+            // Update the center of mass for the parent
+            if (currentNode->parent) {
+                currentNode->parent->centerMass.x += currentNode->centerMass.x * currentNode->mass;
+                currentNode->parent->centerMass.y += currentNode->centerMass.y * currentNode->mass;
+            }
+
+        }
     }
-
-}
-/*
-Vect Node::calAccel(Particle part1, Particle part2)
-{
-    return ;
 }
 
-*/
 
 
 
@@ -430,7 +455,7 @@ Vect Node::CalcForce(Particle _part)
         {
             Vect returnBuffer;
             //for all children c of n
-#pragma omp parallel for 
+#pragma omp parallel for reduction(+:retForce.x, retForce.y)
             for (int i = 0; i < 4; ++i) 
             {
                 //f = f + TreeForce(i,c)
@@ -457,16 +482,17 @@ Vect Node::CalcForce(Particle _part)
 
 void Node::Destroy()
 {
-    
-
     for (unsigned int i = 0; i < 4; i++)
     {
-        //What do I do, Lord?
-        //Destroy the child
-        _node[i]->Destroy();
-        //Corrupt them all
-        delete _node[i];
-        _node[i] = nullptr;
+        if (_node[i] != nullptr)
+        {
+            // Destroy the child
+            _node[i]->Destroy();
+            // Delete the child node
+            delete _node[i];
+            // Set the pointer to nullptr
+            _node[i] = nullptr;
+        }
     }
 
     // Reset metadata
@@ -475,10 +501,5 @@ void Node::Destroy()
     this->particleCount = 0;
     this->mass = 0;
     this->centerMass = Vect(0.0, 0.0);
-    
-
-    //Reset bounding box
-
-
-
 }
+

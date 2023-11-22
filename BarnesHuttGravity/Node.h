@@ -38,6 +38,8 @@ public:
 	unsigned int particleCount = 0;
 
 
+
+
 	//enumerate our quadrants, 0 indexed
 	enum Quadrant
 	{
