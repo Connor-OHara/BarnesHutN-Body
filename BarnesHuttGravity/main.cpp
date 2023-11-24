@@ -27,6 +27,18 @@
 #include <iomanip>
 #include <cmath>
 #include "Node.h"
+#include <vector>
+#include "Quadtree.h"
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <random>
+#include <memory>
+#include "particle.h"
 
 
 
@@ -36,38 +48,26 @@
 */
 int main() {
     try {
-        std::cout << "Building Tree\n";
+        Quadtree quadtree(0, 0, 100, 100, 0.5);
 
-        // Initialize the global root node
-        Node rootNode(Vect(0, 0), Vect(100, 100), nullptr);
-        Node::root = &rootNode;
+        // Generate and insert random particles
+        quadtree.generateRandomParticles(quadtree.root.get(), 100);
 
-        std::cout << std::fixed << std::setprecision(2);
+        // Print out random particles and forces
+        for (int i = 0; i < 100; ++i) {
+            // Generate random positions for each particle
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<double> randX(quadtree.root->x - quadtree.root->width / 2, quadtree.root->x + quadtree.root->width / 2);
+            std::uniform_real_distribution<double> randY(quadtree.root->y - quadtree.root->height / 2, quadtree.root->y + quadtree.root->height / 2);
 
-        // Create a galaxy-like dataset of points
-        const int numPoints = 1000000;
-        const double centerX = 50.0;
-        const double centerY = 50.0;
-        const double galaxyRadius = 100.0;
-
-        for (int i = 0; i < numPoints; ++i) {
-            double angle = 2.0 * M_PI * static_cast<double>(i) / numPoints;
-            double radius = galaxyRadius * static_cast<double>(i) / numPoints;
-
-            double x = centerX + radius * std::cos(angle);
-            double y = centerY + radius * std::sin(angle);
-
-            auto particle = std::make_shared<Particle>(x, y, 10.0); // Adjust mass as needed
-            rootNode.Add(particle);
+            Particle randomParticle(randX(gen), randY(gen), 0.1);
+            quadtree.root->updateForce(&randomParticle, quadtree.theta);
+            std::cout << "Random Particle " << i + 1 << ": (" << randomParticle.x << ", " << randomParticle.y
+                << "), Force: (" << randomParticle.forceX << ", " << randomParticle.forceY << ")" << std::endl;
         }
 
-        // Print the details of the galaxy particles
-        std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
-
-        // Print final details
-        double rootMass = rootNode.mass;
-        std::cout << "Root Mass: " << rootMass << std::endl;
-        std::cout << "Particle Count: " << rootNode.particleCount << std::endl;
+        return 0;
     }
     catch (const std::exception& exec) {
         std::cout << "Error: " << exec.what() << std::endl;

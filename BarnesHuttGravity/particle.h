@@ -8,6 +8,7 @@ This is the file that defines a Particle.
 */
 
 #include <vector>
+#include "Vect.h"
 
 using namespace std;
 
@@ -24,12 +25,12 @@ class Particle
 public:
 
 	//Default Constructors with overloads.
-	Particle(double x_, double y_, double mass);
-	Particle(double x_, double y_, double mass, double accX, double accY);
-	Particle() : x(0.0), y(0.0), mass(0.0), accelerationX(0.0), accelerationY(0.0) {};
+	Particle(double x, double y, double mass) : x(x), y(y), mass(mass), forceX(0.0), forceY(0.0) {}
 
 	// Sets the default location 
 	void setLocation(double x_, double y_);
+
+	void setLocation(const Vect& force);
 	
 	
 	//getter and setter for mass
@@ -38,6 +39,9 @@ public:
 
 	double getX() const;
 	double getY() const;
+
+	void setX(double newX);
+	void setY(double newY);
 
 	// Define the equality operator
 	bool operator==(const Particle& other) const {
@@ -50,11 +54,12 @@ public:
 	double getAccY();
 
 
-protected:
 	/// <summary>
 	///	Protected attributes.
 	/// </summary>
-	double x, y, mass = 1.0, accelerationX = 0.0, accelerationY = 0.0;
+	double x, y; // Position
+	double mass;
+	double forceX, forceY; // Forces acting on the particle
 };
 
 #endif 

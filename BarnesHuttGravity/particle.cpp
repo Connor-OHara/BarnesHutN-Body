@@ -1,69 +1,44 @@
 #include "particle.h"
-
-Particle::Particle(double x_, double y_, double mass)
-{
-	this->x = x_;
-	this->y = y_;
-	this->mass = mass;
-}
-
-Particle::Particle(double x_, double y_, double mass, double accX, double accY)
-{
-	this->x = x_;
-	this->y = y_;
-	this->mass = mass;
-	this->accelerationX = accX;
-	this->accelerationY = accY;
-}
+#include "Vect.h"
 
 
 //Getters and setters
 
-void Particle::setLocation(double x_, double y_)
-{
-	this->x = x_;
-	this->y = y_;
+void Particle::setLocation(double x_, double y_) {
+    this->x = x_;
+    this->y = y_;
 }
 
+void Particle::setLocation(const Vect& force) {
+    // Assuming you have getX and getY methods
+    double newX = getX() + force.x;
+    double newY = getY() + force.y;
 
-double Particle::getX() const
-{
-	return this->x;
+    // Assuming you have setX and setY methods
+    setX(newX);
+    setY(newY);
 }
 
-double Particle::getY() const
-{
-	return this->y;
+double Particle::getX() const {
+    return this->x;
 }
 
-void Particle::setMass(double mass_)
-{
-	this->mass = mass;
+double Particle::getY() const {
+    return this->y;
 }
 
-double Particle::getMass() const
-{
-	return this->mass;
+void Particle::setX(double newX) {
+    this->x = newX;
 }
 
-
-
-void Particle::setAccX(double acc)
-{
-	this->accelerationX = acc;
+void Particle::setY(double newY) {
+    this->y = newY;
 }
 
-void Particle::setAccY(double acc)
-{
-	this->accelerationY = acc;
+void Particle::setMass(double mass_) {
+    this->mass = mass_;
 }
 
-double Particle::getAccX()
-{
-	return this->accelerationX;
-}
-
-double Particle::getAccY()
-{
-	return this->accelerationY;
+double Particle::getMass() const {
+    return this->mass;
 }

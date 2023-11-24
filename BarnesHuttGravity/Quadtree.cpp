@@ -1,0 +1,104 @@
+// Quadtree.cpp
+#include "Quadtree.h"
+#include "Node.h"
+#include "Particle.h"
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <random>
+
+
+
+Quadtree::Quadtree(double x, double y, double width, double height, double theta) : root(new Node(x, y, width, height)), theta(theta) {}
+
+Quadtree::~Quadtree() {}
+
+void Quadtree::insert(Node* node, Particle* particle) {
+    node->mass += particle->mass;
+    node->x = (node->x * (node->mass - particle->mass) + particle->x * particle->mass) / node->mass;
+    node->y = (node->y * (node->mass - particle->mass) + particle->y * particle->mass) / node->mass;
+
+    if (node->isLeaf) {
+        if (node->particle == nullptr) {
+            node->particle = particle;
+        }
+        else {
+            if (node->x == particle->x && node->y == particle->y) {
+                node->isLeaf = false;
+                split(node, particle->x, particle->y, node->width, node->height);
+
+                int existingParticleQuadrant = getQuadrant(node, node->particle->x, node->particle->y);
+                insert(node->children[existingParticleQuadrant].get(), node->particle);
+                node->particle = nullptr;
+
+                int newParticleQuadrant = getQuadrant(node, particle->x, particle->y);
+                insert(node->children[newParticleQuadrant].get(), particle);
+            }
+            else {
+                node->isLeaf = false;
+                split(node, particle->x, particle->y, node->width, node->height);
+
+                int existingParticleQuadrant = getQuadrant(node, node->particle->x, node->particle->y);
+                insert(node->children[existingParticleQuadrant].get(), node->particle);
+                node->particle = nullptr;
+
+                int newParticleQuadrant = getQuadrant(node, particle->x, particle->y);
+                insert(node->children[newParticleQuadrant].get(), particle);
+            }
+        }
+    }
+    else {
+        int quadrant = getQuadrant(node, particle->x, particle->y);
+
+        if (node->children[quadrant] == nullptr) {
+            double subX = node->x + (quadrant % 2) * node->width / 2;
+            double subY = node->y + (quadrant / 2) * node->height / 2;
+            node->children[quadrant] = std::make_unique<Node>(subX + node->width / 4, subY + node->height / 4, node->width / 2, node->height / 2);
+        }
+
+        insert(node->children[quadrant].get(), particle);
+    }
+}
+
+void Quadtree::generateRandomParticles(Node* node, int numParticles) {
+    // Random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> randX(node->x - node->width / 2, node->x + node->width / 2);
+    std::uniform_real_distribution<double> randY(node->y - node->height / 2, node->y + node->height / 2);
+
+    for (int i = 0; i < numParticles; ++i) {
+        double px = randX(gen);
+        double py = randY(gen);
+
+        Particle* particle = new Particle(px, py, 0.1);
+        insert(node, particle);
+    }
+}
+
+
+void Quadtree::split(Node* node, double x, double y, double width, double height) {
+    double subWidth = width / 2;
+    double subHeight = height / 2;
+
+    node->children[0] = std::make_unique<Node>(x + subWidth / 2, y + subHeight / 2, subWidth, subHeight);
+    node->children[1] = std::make_unique<Node>(x + 3 * subWidth / 2, y + subHeight / 2, subWidth, subHeight);
+    node->children[2] = std::make_unique<Node>(x + subWidth / 2, y + 3 * subHeight / 2, subWidth, subHeight);
+    node->children[3] = std::make_unique<Node>(x + 3 * subWidth / 2, y + 3 * subHeight / 2, subWidth, subHeight);
+}
+
+int Quadtree::getQuadrant(Node* node, double px, double py) {
+    if (px < node->x && py < node->y) {
+        return 0; // Top-left
+    }
+    else if (px >= node->x && py < node->y) {
+        return 1; // Top-right
+    }
+    else if (px < node->x && py >= node->y) {
+        return 2; // Bottom-left
+    }
+    else {
+        return 3; // Bottom-right
+    }
+}
