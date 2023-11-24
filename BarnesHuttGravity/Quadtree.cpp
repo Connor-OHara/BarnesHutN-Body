@@ -14,6 +14,9 @@ Quadtree::Quadtree(double x, double y, double width, double height, double theta
 
 Quadtree::~Quadtree() {}
 
+
+
+
 void Quadtree::insert(Node* node, Particle* particle) {
     node->mass += particle->mass;
     node->x = (node->x * (node->mass - particle->mass) + particle->x * particle->mass) / node->mass;
@@ -61,21 +64,6 @@ void Quadtree::insert(Node* node, Particle* particle) {
     }
 }
 
-void Quadtree::generateRandomParticles(Node* node, int numParticles) {
-    // Random number generator
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> randX(node->x - node->width / 2, node->x + node->width / 2);
-    std::uniform_real_distribution<double> randY(node->y - node->height / 2, node->y + node->height / 2);
-
-    for (int i = 0; i < numParticles; ++i) {
-        double px = randX(gen);
-        double py = randY(gen);
-
-        Particle* particle = new Particle(px, py, 0.1);
-        insert(node, particle);
-    }
-}
 
 
 void Quadtree::split(Node* node, double x, double y, double width, double height) {
@@ -102,3 +90,81 @@ int Quadtree::getQuadrant(Node* node, double px, double py) {
         return 3; // Bottom-right
     }
 }
+
+void Quadtree::collectParticles(Node* node, std::vector<Particle>& particles) {
+    if (node->isLeaf) {
+        if (node->particle != nullptr) {
+            particles.push_back(*(node->particle));
+        }
+    }
+    else {
+        for (int i = 0; i < 4; ++i) {
+            if (node->children[i] != nullptr) {
+                collectParticles(node->children[i].get(), particles);
+            }
+        }
+    }
+}
+
+void Quadtree::generateRandomParticles(Node* node, int numParticles) {
+    // Random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> randX(node->x - node->width / 2, node->x + node->width / 2);
+    std::uniform_real_distribution<double> randY(node->y - node->height / 2, node->y + node->height / 2);
+
+    for (int i = 0; i < numParticles; ++i) {
+        double px = randX(gen);
+        double py = randY(gen);
+
+        Particle* particle = new Particle(px, py, 0.1);
+        insert(node, particle);
+    }
+}
+
+
+
+std::vector<Particle> Quadtree::updateParticlesAfterForces(double deltaTime) {
+    std::vector<Particle> particles;
+
+    // Generate random particles
+    generateRandomParticles(root.get(), 100);
+
+    // Get particles from the quadtree
+    particles = getParticles();
+
+    // Update forces and positions
+    for (auto& particle : particles) {
+        root->updateForce(&particle, theta);
+        particle.updatePosition(deltaTime);
+    }
+
+    return particles;
+}
+
+
+
+void Quadtree::seedParticles(int numParticles) {
+    generateRandomParticles(root.get(), numParticles);
+}
+
+
+std::vector<Particle> Quadtree::getParticles() {
+    std::vector<Particle> particles;
+    collectParticles(root.get(), particles);
+    return particles;
+}
+
+void Quadtree::updateQuadtree(double deltaTime, int numIterations) {
+    for (int iteration = 0; iteration < numIterations; ++iteration) {
+        // Update forces and positions in the quadtree
+        std::vector<Particle> particles = getParticles();
+
+        for (auto& particle : particles) {
+            root->updateForce(&particle, theta);
+            particle.updatePosition(deltaTime);
+        }
+    }
+}
+
+

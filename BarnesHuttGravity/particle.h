@@ -1,65 +1,14 @@
+// Particle.h
 #pragma once
-/*
-Author: Connor O'Hara
-Class : ECE4122
-Last Date Modified : 10/10/2023
-Description :
-This is the file that defines a Particle. 
-*/
 
-#include <vector>
-#include "Vect.h"
-
-using namespace std;
-
-#ifndef N_PART
-#define N_PART
-
-/*
-* Description:
-* Header class describing important member functions, constructor, and descriptors for the class.
-* The Point Charge Class describes a singular point charge in 3D space, giving it attributes about its location and charge quantity.
-*/
-class Particle
-{
+class Particle {
 public:
+    double x, y;
+    double mass;
+    double forceX, forceY; // Added forces for the particle
 
-	//Default Constructors with overloads.
-	Particle(double x, double y, double mass) : x(x), y(y), mass(mass), forceX(0.0), forceY(0.0) {}
+    Particle(double x, double y, double mass);
 
-	// Sets the default location 
-	void setLocation(double x_, double y_);
-
-	void setLocation(const Vect& force);
-	
-	
-	//getter and setter for mass
-	void setMass(double mass_);
-	double getMass() const;
-
-	double getX() const;
-	double getY() const;
-
-	void setX(double newX);
-	void setY(double newY);
-
-	// Define the equality operator
-	bool operator==(const Particle& other) const {
-		return (getX() == other.getX()) && (getY() == other.getY());
-	}
-
-	void setAccX(double acc);
-	void setAccY(double acc);
-	double getAccX();
-	double getAccY();
-
-
-	/// <summary>
-	///	Protected attributes.
-	/// </summary>
-	double x, y; // Position
-	double mass;
-	double forceX, forceY; // Forces acting on the particle
+    // Update position based on velocity
+    void updatePosition(double deltaTime);
 };
-
-#endif 

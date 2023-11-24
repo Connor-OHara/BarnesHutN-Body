@@ -21,59 +21,59 @@
 #define _USE_MATH_DEFINES
 
 
-#include <stdio.h>
-#include <omp.h>
-#include <iostream>
-#include <iomanip>
-#include <cmath>
-#include "Node.h"
-#include <vector>
+#include <SFML/Graphics.hpp>
 #include "Quadtree.h"
-
-
+#include "Node.h"
+#include "Particle.h"
 #include <iostream>
-#include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
-#include <random>
-#include <memory>
-#include "particle.h"
-
-
-
 /*
 * This is the main function that acts as a dispatcher for the subprocesses that will manage 
 * The running of the simulation. 
 */
 int main() {
-    try {
-        Quadtree quadtree(0, 0, 100, 100, 0.5);
+    // Initialize quadtree with the desired parameters
+    Quadtree quadtree(0, 0, 1400, 950, 0.5);
 
-        // Generate and insert random particles
-        quadtree.generateRandomParticles(quadtree.root.get(), 100);
+    // Seed the screen with particles
+    quadtree.seedParticles(100);
 
-        // Print out random particles and forces
-        for (int i = 0; i < 100; ++i) {
-            // Generate random positions for each particle
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<double> randX(quadtree.root->x - quadtree.root->width / 2, quadtree.root->x + quadtree.root->width / 2);
-            std::uniform_real_distribution<double> randY(quadtree.root->y - quadtree.root->height / 2, quadtree.root->y + quadtree.root->height / 2);
+    // Create SFML window
+    sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
 
-            Particle randomParticle(randX(gen), randY(gen), 0.1);
-            quadtree.root->updateForce(&randomParticle, quadtree.theta);
-            std::cout << "Random Particle " << i + 1 << ": (" << randomParticle.x << ", " << randomParticle.y
-                << "), Force: (" << randomParticle.forceX << ", " << randomParticle.forceY << ")" << std::endl;
+    // Create SFML circle shape for particles
+    sf::CircleShape particleShape(2.0f);
+    particleShape.setFillColor(sf::Color::White);
+
+    std::cout << "Finished building initial conditions: " << quadtree.getParticles().size() << std::endl;
+
+    // Main loop
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
         }
 
-        return 0;
-    }
-    catch (const std::exception& exec) {
-        std::cout << "Error: " << exec.what() << std::endl;
-    }
-    catch (...) {
-        std::cout << "Unknown Error" << std::endl;
+        // Clear the window
+        window.clear();
+
+        // Update forces and positions in the quadtree
+        quadtree.updateQuadtree(0.1, 10);  // Adjust time step and iterations as needed
+
+        // Get particles from the quadtree
+        std::vector<Particle> particles = quadtree.getParticles();
+
+        // Draw particles
+        for (const auto& particle : particles) {
+            // Set particle shape position
+            particleShape.setPosition(particle.x, particle.y);
+
+            // Draw the particle
+            window.draw(particleShape);
+        }
+
+        // Display the window
+        window.display();
     }
 
     return 0;
