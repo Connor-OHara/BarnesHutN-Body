@@ -35,7 +35,7 @@ int main() {
     Quadtree quadtree(0, 0, 1400, 950, 0.5);
 
     // Seed the screen with particles
-    quadtree.seedParticles(100);
+    quadtree.seedParticles(200);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -43,6 +43,20 @@ int main() {
     // Create SFML circle shape for particles
     sf::CircleShape particleShape(2.0f);
     particleShape.setFillColor(sf::Color::White);
+
+    // Create an SFML view
+    sf::View view(sf::FloatRect(0, 0, 1400, 950));
+    window.setView(view);
+
+    // Center the view on the particles initially
+    sf::FloatRect boundingBox = quadtree.getBoundingBox();
+
+    view.setCenter(boundingBox.left + boundingBox.width / 2, boundingBox.top + boundingBox.height / 2);
+    window.setView(view);
+
+    // Variables for click-and-drag
+    bool isDragging = false;
+    sf::Vector2i lastMousePosition;
 
     std::cout << "Finished building initial conditions: " << quadtree.getParticles().size() << std::endl;
 
@@ -52,6 +66,36 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
+
+            // Handle zoom in and out
+            if (event.type == sf::Event::MouseWheelScrolled) {
+                if (event.mouseWheelScroll.delta > 0) {
+                    view.zoom(0.9f); // Zoom in
+                }
+                else if (event.mouseWheelScroll.delta < 0) {
+                    view.zoom(1.1f); // Zoom out
+                }
+                window.setView(view);
+            }
+
+            // Handle click-and-drag for panning
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                isDragging = true;
+                lastMousePosition = sf::Mouse::getPosition(window);
+            }
+            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+                isDragging = false;
+            }
+        }
+
+        // Update click-and-drag panning
+        if (isDragging) {
+            sf::Vector2i currentMousePosition = sf::Mouse::getPosition(window);
+            sf::Vector2f delta = window.mapPixelToCoords(currentMousePosition) - window.mapPixelToCoords(lastMousePosition);
+            view.move(-delta);
+            window.setView(view);
+
+            lastMousePosition = currentMousePosition;
         }
 
         // Clear the window

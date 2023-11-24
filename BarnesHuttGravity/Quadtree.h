@@ -5,6 +5,8 @@
 
 #include <memory>
 #include <vector>
+#include <SFML/Graphics.hpp>
+#include "Node.h"
 
 class Node; // Forward declaration
 class Particle; // Forward declaration
@@ -34,5 +36,11 @@ public:
 
 
     void seedParticles(int numParticles);
+
+
+
+    sf::FloatRect getBoundingBox() const {
+        return root->getBoundingBox();
+    }
 };
 #endif // QUADTREE_H

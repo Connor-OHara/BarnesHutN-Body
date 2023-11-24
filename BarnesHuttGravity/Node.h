@@ -5,6 +5,7 @@
 
 #pragma once
 #include <memory>
+#include <SFML/Graphics.hpp>
 
 class Particle; // Forward declaration
 
@@ -23,6 +24,10 @@ public:
     ~Node();
     void updateForce(Particle* target, double theta);
 
+
+    sf::FloatRect getBoundingBox() const {
+        return sf::FloatRect(x - width / 2, y - height / 2, width, height);
+    }
 
 };
 

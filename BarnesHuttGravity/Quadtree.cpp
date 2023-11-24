@@ -117,6 +117,10 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles) {
         double px = randX(gen);
         double py = randY(gen);
 
+        // Ensure particle stays within the node's boundaries
+        px = std::max(node->x - node->width / 2, std::min(node->x + node->width / 2, px));
+        py = std::max(node->y - node->height / 2, std::min(node->y + node->height / 2, py));
+
         Particle* particle = new Particle(px, py, 0.1);
         insert(node, particle);
     }
@@ -124,11 +128,9 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles) {
 
 
 
+
 std::vector<Particle> Quadtree::updateParticlesAfterForces(double deltaTime) {
     std::vector<Particle> particles;
-
-    // Generate random particles
-    generateRandomParticles(root.get(), 100);
 
     // Get particles from the quadtree
     particles = getParticles();
@@ -166,5 +168,4 @@ void Quadtree::updateQuadtree(double deltaTime, int numIterations) {
         }
     }
 }
-
 
