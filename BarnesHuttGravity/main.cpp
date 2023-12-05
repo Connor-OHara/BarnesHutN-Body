@@ -85,13 +85,13 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(50, 0.1, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(10, 100, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
 
     // Create SFML circle shape for particles
-    sf::CircleShape particleShape(2.0f);
+    sf::CircleShape particleShape(5.0f);
     particleShape.setFillColor(sf::Color::White);
 
     // Create an SFML view
@@ -155,14 +155,14 @@ int main() {
         std::vector<Particle> particles = quadtree.getParticles();
 
         // Assuming particles is a vector of Particle in your main code
-        quadtree.updateParticlesAfterForces(particles, .1);
+        quadtree.updateParticlesAfterForces(particles, .01);
 
 
 
         // Print forces on the first particle
         if (!particles.empty()) {
             Particle& firstParticle = particles[0];
-            std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << std::endl;
+            std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", ForceX: " << firstParticle.forceX << ", ForceY: " << firstParticle.forceY    << ", VelocityX: " <<  firstParticle.velocityX << " VelocityY: "  << firstParticle.velocityY << std::endl;
         }
 
         // Clear the window

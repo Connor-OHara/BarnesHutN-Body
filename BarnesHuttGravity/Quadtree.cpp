@@ -23,35 +23,22 @@ double forceScale = 1.0;  // Adjust this scaling factor as needed
 
 
 void Quadtree::insert(Node* node, Particle* particle) {
-    node->mass += particle->mass;
-    node->x = (node->x * (node->mass - particle->mass) + particle->x * particle->mass) / node->mass;
-    node->y = (node->y * (node->mass - particle->mass) + particle->y * particle->mass) / node->mass;
-
-    if (node->isLeaf) {
-        if (node->particle == nullptr) {
-            node->particle = particle;
+    // Existing particle at this node
+    if (node->isLeaf && node->particle != nullptr) {
+        // Split the node only if the particle and the existing one are at different positions
+        if (node->particle->x != particle->x || node->particle->y != particle->y) {
+            node->isLeaf = false;
+            split(node, particle->x, particle->y, node->width, node->height);
+            moveParticleToChild(node, node->particle);
         }
-        else {
-            // Use a clearer condition for checking if the particle position matches the node position
-            if (node->x == particle->x && node->y == particle->y) {
-                // The particle and the existing one are at the same position, split the node
-                node->isLeaf = false;
-                split(node, particle->x, particle->y, node->width, node->height);
-
-                // Use a helper function to avoid duplicate code
-                moveParticleToChild(node, node->particle);
-                moveParticleToChild(node, particle);
-            }
-            else {
-                // The particle and the existing one are at different positions, split the node
-                node->isLeaf = false;
-                split(node, particle->x, particle->y, node->width, node->height);
-
-                moveParticleToChild(node, node->particle);
-                moveParticleToChild(node, particle);
-            }
-        }
+        // Move the new particle to the appropriate child node
+        moveParticleToChild(node, particle);
     }
+    // No existing particle, insert the new one
+    else if (node->isLeaf && node->particle == nullptr) {
+        node->particle = particle;
+    }
+    // Internal node, move the new particle to the appropriate child node
     else {
         int quadrant = getQuadrant(node, particle->x, particle->y);
 
@@ -64,6 +51,7 @@ void Quadtree::insert(Node* node, Particle* particle) {
         insert(node->children[quadrant].get(), particle);
     }
 }
+
 
 // Helper function to move a particle to the appropriate child node
 void Quadtree::moveParticleToChild(Node* node, Particle* particle) {
@@ -155,9 +143,15 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles, double part
 
 
 
+
+
+
+
 void Quadtree::seedParticles(int numParticles, double mass, double simX, double simY, double simWidth, double simHeight) {
-    generateRandomParticles(root.get(), numParticles, mass, simX, simY, simWidth, simHeight);
+    generateRandomParticles(root.get(), numParticles, mass, root->x, root->y, root->width, root->height);
 }
+
+
 
 
 std::vector<Particle> Quadtree::getParticles() {
@@ -168,17 +162,21 @@ std::vector<Particle> Quadtree::getParticles() {
 
 void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime) {
     for (auto& particle : particles) {
-        std::cout << "Particle before update - X: " << particle.x << ", Y: " << particle.y << std::endl;
+        //std::cout << "Particle before update - X: " << particle.x << ", Y: " << particle.y << std::endl;
+
+
+        //std::cout << "Forces before update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
 
         root->updateForce(particle, theta, forceScale);
 
-        std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
+        //std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
 
         particle.updatePosition(deltaTime);
 
-        std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
+        //std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
     }
 }
+
 
 
 

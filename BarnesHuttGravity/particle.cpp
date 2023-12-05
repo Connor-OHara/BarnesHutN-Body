@@ -6,34 +6,35 @@ constexpr double damping = 0.99; // Add damping as a constant
 //Particle::Particle(double x, double y, double mass) : x(x), y(y), mass(mass), forceX(0.0), forceY(0.0), velocityX(0.0), velocityY(0.0) {}
 
 void Particle::updatePosition(double deltaTime) {
-    double accelerationX = forceX / mass;
-    double accelerationY = forceY / mass;
 
-    // Debug output for forces, acceleration, velocity, and position before the update
-    //std::cout << "Forces - X: " << forceX << ", Y: " << forceY << std::endl;
-    //std::cout << "Initial Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
+    // Verlet integration
+    double halfDeltaTime = 0.5 * deltaTime;
 
-    // Update velocity with damping
-    velocityX += deltaTime * (damping * accelerationX);
-    velocityY += deltaTime * (damping * accelerationY);
+    // Debugging output
+    //std::cout << "Particle before update - X: " << x << ", Y: " << y << std::endl;
+    //std::cout << "Forces before update - X: " << forceX << ", Y: " << forceY << std::endl;
 
-    // Debug output for the updated acceleration, velocity, and position
-    //std::cout << "Acceleration - X: " << accelerationX << ", Y: " << accelerationY << std::endl;
-    //std::cout << "Post Update Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
-    //std::cout << "PART Initial Position - X: " << x << ", Y: " << y << std::endl;
+    // Update velocity (midpoint method)
+    velocityX += (forceX / mass) * halfDeltaTime;
+    velocityY += (forceY / mass) * halfDeltaTime;
+
+    // Update position
+    x += velocityX * deltaTime;
+    y += velocityY * deltaTime;
 
 
-    // Update position based on the updated velocity
-    x += deltaTime * velocityX;
-    y += deltaTime * velocityY;
+    // Update velocity (midpoint method)
+    velocityX += (forceX / mass) * halfDeltaTime;
+    velocityY += (forceY / mass) * halfDeltaTime;
 
-    // Debug output for the updated velocity and position
-    //std::cout << "Post Update Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
-    //std::cout << "PART Updated Position - X: " << x << ", Y: " << y << std::endl;
+    // Debugging output
+    //std::cout << "Forces after update - X: " << forceX << ", Y: " << forceY << std::endl;
+    //std::cout << "Particle after update - X: " << x << ", Y: " << y << std::endl;
 
-    // Reset forces after updating position
+    // Reset forces for the next iteration
     forceX = 0.0;
     forceY = 0.0;
 }
+
 
 

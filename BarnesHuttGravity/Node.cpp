@@ -14,6 +14,8 @@
 #include "Quadtree.h"
 
 
+
+
 Node::Node(double x, double y, double width, double height) : x(x), y(y), width(width), height(height), mass(0.0), isLeaf(true), particle(nullptr) {
     for (int i = 0; i < 4; ++i) {
         children[i] = nullptr;
