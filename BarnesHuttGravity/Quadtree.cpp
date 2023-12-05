@@ -17,6 +17,11 @@ Quadtree::~Quadtree() {}
 double forceScale = 1.0;  // Adjust this scaling factor as needed
 
 
+
+
+
+
+
 void Quadtree::insert(Node* node, Particle* particle) {
     node->mass += particle->mass;
     node->x = (node->x * (node->mass - particle->mass) + particle->x * particle->mass) / node->mass;
@@ -27,27 +32,23 @@ void Quadtree::insert(Node* node, Particle* particle) {
             node->particle = particle;
         }
         else {
+            // Use a clearer condition for checking if the particle position matches the node position
             if (node->x == particle->x && node->y == particle->y) {
+                // The particle and the existing one are at the same position, split the node
                 node->isLeaf = false;
                 split(node, particle->x, particle->y, node->width, node->height);
 
-                int existingParticleQuadrant = getQuadrant(node, node->particle->x, node->particle->y);
-                insert(node->children[existingParticleQuadrant].get(), node->particle);
-                node->particle = nullptr;
-
-                int newParticleQuadrant = getQuadrant(node, particle->x, particle->y);
-                insert(node->children[newParticleQuadrant].get(), particle);
+                // Use a helper function to avoid duplicate code
+                moveParticleToChild(node, node->particle);
+                moveParticleToChild(node, particle);
             }
             else {
+                // The particle and the existing one are at different positions, split the node
                 node->isLeaf = false;
                 split(node, particle->x, particle->y, node->width, node->height);
 
-                int existingParticleQuadrant = getQuadrant(node, node->particle->x, node->particle->y);
-                insert(node->children[existingParticleQuadrant].get(), node->particle);
-                node->particle = nullptr;
-
-                int newParticleQuadrant = getQuadrant(node, particle->x, particle->y);
-                insert(node->children[newParticleQuadrant].get(), particle);
+                moveParticleToChild(node, node->particle);
+                moveParticleToChild(node, particle);
             }
         }
     }
@@ -64,17 +65,40 @@ void Quadtree::insert(Node* node, Particle* particle) {
     }
 }
 
+// Helper function to move a particle to the appropriate child node
+void Quadtree::moveParticleToChild(Node* node, Particle* particle) {
+    int quadrant = getQuadrant(node, particle->x, particle->y);
 
+    if (node->children[quadrant] == nullptr) {
+        double subX = node->x + (quadrant % 2) * node->width / 2;
+        double subY = node->y + (quadrant / 2) * node->height / 2;
+        node->children[quadrant] = std::make_unique<Node>(subX + node->width / 4, subY + node->height / 4, node->width / 2, node->height / 2);
+    }
+
+    insert(node->children[quadrant].get(), particle);
+}
 
 void Quadtree::split(Node* node, double x, double y, double width, double height) {
     double subWidth = width / 2;
     double subHeight = height / 2;
 
-    node->children[0] = std::make_unique<Node>(x + subWidth / 2, y + subHeight / 2, subWidth, subHeight);
-    node->children[1] = std::make_unique<Node>(x + 3 * subWidth / 2, y + subHeight / 2, subWidth, subHeight);
-    node->children[2] = std::make_unique<Node>(x + subWidth / 2, y + 3 * subHeight / 2, subWidth, subHeight);
-    node->children[3] = std::make_unique<Node>(x + 3 * subWidth / 2, y + 3 * subHeight / 2, subWidth, subHeight);
+    // Adjust the child node positions relative to the parent node
+    node->children[0] = std::make_unique<Node>(x - subWidth / 2, y - subHeight / 2, subWidth, subHeight);
+    node->children[1] = std::make_unique<Node>(x + subWidth / 2, y - subHeight / 2, subWidth, subHeight);
+    node->children[2] = std::make_unique<Node>(x - subWidth / 2, y + subHeight / 2, subWidth, subHeight);
+    node->children[3] = std::make_unique<Node>(x + subWidth / 2, y + subHeight / 2, subWidth, subHeight);
+
+    // Debug output to print node information after splitting
+    std::cout << "Splitting Node - Parent: X: " << x << ", Y: " << y << ", Width: " << width << ", Height: " << height << std::endl;
+    for (int i = 0; i < 4; ++i) {
+        std::cout << "Child " << i << " - X: " << node->children[i]->x << ", Y: " << node->children[i]->y << ", Width: " << node->children[i]->width << ", Height: " << node->children[i]->height << std::endl;
+    }
 }
+
+
+
+
+
 
 int Quadtree::getQuadrant(Node* node, double px, double py) {
     if (px < node->x && py < node->y) {
@@ -106,29 +130,35 @@ void Quadtree::collectParticles(Node* node, std::vector<Particle>& particles) {
     }
 }
 
-void Quadtree::generateRandomParticles(Node* node, int numParticles) {
+void Quadtree::generateRandomParticles(Node* node, int numParticles, double particleMass, double simX, double simY, double simWidth, double simHeight) {
     // Random number generator
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> randX(node->x - node->width / 2, node->x + node->width / 2);
-    std::uniform_real_distribution<double> randY(node->y - node->height / 2, node->y + node->height / 2);
+    std::uniform_real_distribution<double> randX(simX - simWidth / 2, simX + simWidth / 2);
+    std::uniform_real_distribution<double> randY(simY - simHeight / 2, simY + simHeight / 2);
 
     for (int i = 0; i < numParticles; ++i) {
         double px = randX(gen);
         double py = randY(gen);
 
         // Ensure particle stays within the node's boundaries
-        px = std::max(node->x - node->width / 2, std::min(node->x + node->width / 2, px));
-        py = std::max(node->y - node->height / 2, std::min(node->y + node->height / 2, py));
+        px = std::max(simX - simWidth / 2, std::min(simX + simWidth / 2, px));
+        py = std::max(simY - simHeight / 2, std::min(simY + simHeight / 2, py));
 
-        Particle* particle = new Particle(px, py, .1);
+        Particle* particle = new Particle(px, py, particleMass);
         insert(node, particle);
+
+        // Debug output
+        std::cout << "Generated Particle - X: " << particle->x << ", Y: " << particle->y << ", Mass: " << particle->mass << std::endl;
     }
 }
 
-void Quadtree::seedParticles(int numParticles) {
-    generateRandomParticles(root.get(), numParticles);
+
+
+void Quadtree::seedParticles(int numParticles, double mass, double simX, double simY, double simWidth, double simHeight) {
+    generateRandomParticles(root.get(), numParticles, mass, simX, simY, simWidth, simHeight);
 }
+
 
 std::vector<Particle> Quadtree::getParticles() {
     std::vector<Particle> particles;
@@ -137,28 +167,18 @@ std::vector<Particle> Quadtree::getParticles() {
 }
 
 void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime) {
-    // Update forces and positions directly in the provided vector
     for (auto& particle : particles) {
-        // Debug output for initial forces
-        std::cout << "Initial Forces - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
+        std::cout << "Particle before update - X: " << particle.x << ", Y: " << particle.y << std::endl;
 
-        // Update forces based on the quadtree
         root->updateForce(particle, theta, forceScale);
 
-        // Debug output for forces after update
         std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
 
-
-
-        // Update position based on the calculated forces
         particle.updatePosition(deltaTime);
 
-        // Debug output for updated position
-        //std::cout << "PART Updated Velocity - X: " << particle.velocityX << ", Y: " << particle.velocityY << std::endl;
-
-        // Debug output for updated position
-        //std::cout << "PART Updated Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
+        std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
     }
 }
+
 
 

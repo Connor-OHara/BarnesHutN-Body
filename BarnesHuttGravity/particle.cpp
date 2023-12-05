@@ -11,7 +11,7 @@ void Particle::updatePosition(double deltaTime) {
 
     // Debug output for forces, acceleration, velocity, and position before the update
     //std::cout << "Forces - X: " << forceX << ", Y: " << forceY << std::endl;
-    std::cout << "Initial Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
+    //std::cout << "Initial Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
 
     // Update velocity with damping
     velocityX += deltaTime * (damping * accelerationX);
@@ -19,8 +19,8 @@ void Particle::updatePosition(double deltaTime) {
 
     // Debug output for the updated acceleration, velocity, and position
     //std::cout << "Acceleration - X: " << accelerationX << ", Y: " << accelerationY << std::endl;
-    std::cout << "Post Update Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
-    std::cout << "PART Initial Position - X: " << x << ", Y: " << y << std::endl;
+    //std::cout << "Post Update Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
+    //std::cout << "PART Initial Position - X: " << x << ", Y: " << y << std::endl;
 
 
     // Update position based on the updated velocity
@@ -29,7 +29,7 @@ void Particle::updatePosition(double deltaTime) {
 
     // Debug output for the updated velocity and position
     //std::cout << "Post Update Velocity - X: " << velocityX << ", Y: " << velocityY << std::endl;
-    std::cout << "PART Updated Position - X: " << x << ", Y: " << y << std::endl;
+    //std::cout << "PART Updated Position - X: " << x << ", Y: " << y << std::endl;
 
     // Reset forces after updating position
     forceX = 0.0;

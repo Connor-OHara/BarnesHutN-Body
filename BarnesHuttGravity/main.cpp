@@ -23,34 +23,53 @@
 
 
 
-void drawBoundingBoxes(sf::RenderWindow& window, Node* node, double parentX, double parentY, double parentWidth, double parentHeight) {
+void drawBoundingBoxes(sf::RenderWindow& window, Node* node, sf::Vector2f parentCenter = sf::Vector2f(0.0f, 0.0f), sf::Vector2f parentSize = sf::Vector2f(0.0f, 0.0f), bool isRoot = false) {
     if (node) {
-        // Calculate the absolute position of the bounding box
-        double absoluteX = parentX + node->x - node->width / 2;
-        double absoluteY = parentY + node->y - node->height / 2;
-
         // Draw the bounding box for the current node
         sf::FloatRect boundingBox = node->getBoundingBox();
         sf::RectangleShape rect(sf::Vector2f(boundingBox.width, boundingBox.height));
-        rect.setPosition(absoluteX, absoluteY);
+        rect.setPosition(boundingBox.left, boundingBox.top);
         rect.setFillColor(sf::Color::Transparent);
-        rect.setOutlineColor(sf::Color::Red); // You can change the color as needed
-        rect.setOutlineThickness(1.0f);
+
+        // Set the outline color
+        if (isRoot) {
+            // Root node color (green border)
+            rect.setOutlineColor(sf::Color::Green);
+        }
+        else {
+            // Non-root nodes color (blue border)
+            rect.setOutlineColor(sf::Color::Blue);
+        }
+
+        rect.setOutlineThickness(2.0f);
         window.draw(rect);
 
         // Recursively draw bounding boxes for children
         for (int i = 0; i < 4; ++i) {
             if (node->children[i]) {
-                // Pass the absolute position and size of the current node to children
-                drawBoundingBoxes(window, node->children[i].get(), absoluteX, absoluteY, node->width / 2, node->height / 2);
+                // Calculate child position
+                sf::Vector2f childPosition;
+                switch (i) {
+                case 0: // Top left
+                    childPosition = sf::Vector2f(boundingBox.left, boundingBox.top);
+                    break;
+                case 1: // Top right
+                    childPosition = sf::Vector2f(boundingBox.left + boundingBox.width / 2.0f, boundingBox.top);
+                    break;
+                case 2: // Bottom left
+                    childPosition = sf::Vector2f(boundingBox.left, boundingBox.top + boundingBox.height / 2.0f);
+                    break;
+                case 3: // Bottom right
+                    childPosition = sf::Vector2f(boundingBox.left + boundingBox.width / 2.0f, boundingBox.top + boundingBox.height / 2.0f);
+                    break;
+                }
+
+                // Recursively draw bounding boxes for children
+                drawBoundingBoxes(window, node->children[i].get(), childPosition, sf::Vector2f(boundingBox.width / 2.0f, boundingBox.height / 2.0f), false);
             }
         }
     }
 }
-
-
-
-
 
 
 /*
@@ -59,10 +78,14 @@ void drawBoundingBoxes(sf::RenderWindow& window, Node* node, double parentX, dou
  */
 int main() {
     // Initialize quadtree with the desired parameters
-    Quadtree quadtree(0, 0, 1400, 950, 0.5);
+    double simulationX = 0.0;
+    double simulationY = 0.0;
+    double simulationWidth = 1400.0;
+    double simulationHeight = 950.0;
+    Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(10);
+    quadtree.seedParticles(50, 0.1, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -154,6 +177,7 @@ int main() {
             window.draw(particleShape);
         }
 
+        /*
         // Draw force vectors for each particle
         for (const auto& particle : particles) {
             sf::Vertex forceVector[] = {
@@ -163,12 +187,9 @@ int main() {
 
             window.draw(forceVector, 2, sf::Lines);
         }
-
-
-        // Draw bounding boxes around nodes
-        drawBoundingBoxes(window, quadtree.root.get(), 0.0, 0.0, 1400.0, 950.0); // Adjust the parameters accordingly
-
-
+        */
+        // Draw bounding box for the root node with green color
+        drawBoundingBoxes(window, quadtree.root.get(), sf::Vector2f(0.0f, 0.0f), sf::Vector2f(simulationWidth, simulationHeight), true); // Adjust the parameters accordingly
 
         // Display the window
         window.display();
