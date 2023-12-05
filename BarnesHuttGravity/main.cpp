@@ -64,12 +64,15 @@ void drawBoundingBoxes(sf::RenderWindow& window, Node* node, sf::Vector2f parent
                     break;
                 }
 
+
                 // Recursively draw bounding boxes for children
                 drawBoundingBoxes(window, node->children[i].get(), childPosition, sf::Vector2f(boundingBox.width / 2.0f, boundingBox.height / 2.0f), false);
+
             }
         }
     }
 }
+
 
 
 /*
@@ -85,7 +88,7 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(10, 100000000, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(50, 100000000, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -202,7 +205,7 @@ int main() {
             window.draw(forceVector, 2, sf::Lines);
         }
         */
-        
+
 
         // Display the window
         window.display();

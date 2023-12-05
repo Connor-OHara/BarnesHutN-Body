@@ -91,10 +91,11 @@ void Quadtree::split(Node* node, double x, double y, double width, double height
     double subHeight = height / 2;
 
     // Adjust the child node positions relative to the parent node
-    node->children[0] = std::make_unique<Node>(x - subWidth / 2, y - subHeight / 2, subWidth, subHeight);
-    node->children[1] = std::make_unique<Node>(x + subWidth / 2, y - subHeight / 2, subWidth, subHeight);
-    node->children[2] = std::make_unique<Node>(x - subWidth / 2, y + subHeight / 2, subWidth, subHeight);
-    node->children[3] = std::make_unique<Node>(x + subWidth / 2, y + subHeight / 2, subWidth, subHeight);
+    node->children[0] = std::make_unique<Node>(node->x - subWidth / 2, node->y - subHeight / 2, subWidth, subHeight);
+    node->children[1] = std::make_unique<Node>(node->x + subWidth / 2, node->y - subHeight / 2, subWidth, subHeight);
+    node->children[2] = std::make_unique<Node>(node->x - subWidth / 2, node->y + subHeight / 2, subWidth, subHeight);
+    node->children[3] = std::make_unique<Node>(node->x + subWidth / 2, node->y + subHeight / 2, subWidth, subHeight);
+
 
     // Debug output to print node information after splitting
     std::cout << "Splitting Node - Parent: X: " << x << ", Y: " << y << ", Width: " << width << ", Height: " << height << std::endl;
@@ -102,8 +103,6 @@ void Quadtree::split(Node* node, double x, double y, double width, double height
         std::cout << "Child " << i << " - X: " << node->children[i]->x << ", Y: " << node->children[i]->y << ", Width: " << node->children[i]->width << ", Height: " << node->children[i]->height << std::endl;
     }
 }
-
-
 
 
 
@@ -138,20 +137,18 @@ void Quadtree::collectParticles(Node* node, std::vector<Particle>& particles) {
     }
 }
 
+
 void Quadtree::generateRandomParticles(Node* node, int numParticles, double particleMass, double simX, double simY, double simWidth, double simHeight) {
     // Random number generator
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<double> randX(simX - simWidth / 2, simX + simWidth / 2);
     std::uniform_real_distribution<double> randY(simY - simHeight / 2, simY + simHeight / 2);
+
 #pragma omp parallel for
     for (int i = 0; i < numParticles; ++i) {
         double px = randX(gen);
         double py = randY(gen);
-
-        // Ensure particle stays within the node's boundaries
-        px = std::max(simX - simWidth / 2, std::min(simX + simWidth / 2, px));
-        py = std::max(simY - simHeight / 2, std::min(simY + simHeight / 2, py));
 
         Particle* particle = new Particle(px, py, particleMass);
         insert(node, particle);
@@ -160,6 +157,8 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles, double part
         std::cout << "Generated Particle - X: " << particle->x << ", Y: " << particle->y << ", Mass: " << particle->mass << std::endl;
     }
 }
+
+
 
 
 
@@ -177,7 +176,7 @@ void Quadtree::seedParticles(int numParticles, double mass, double simX, double 
 std::vector<Particle> Quadtree::getParticles() {
     std::vector<Particle> particles;
     collectParticles(root.get(), particles);
-    return particles; 
+    return particles;
 }
 
 
@@ -205,10 +204,3 @@ void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, doub
         std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
     }
 }
-
-
-
-
-
-
-
