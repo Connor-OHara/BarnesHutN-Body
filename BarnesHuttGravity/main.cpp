@@ -85,7 +85,7 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(2, 100000000, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(10, 100000000, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -159,6 +159,7 @@ int main() {
         std::cout << "Particle positions: ";
         for (int i = 0; i < std::min(5, static_cast<int>(particles.size())); ++i) {
             std::cout << "Particle " << i << " - X: " << particles[i].x << ", Y: " << particles[i].y << " | ";
+            std::cout << "ParticleF " << i << " - XF: " << particles[i].velocityX << ", YF: " << particles[i].velocityY << " | ";
         }
         std::cout << std::endl;
 
@@ -169,12 +170,17 @@ int main() {
 
         // Print forces on the first particle
         if (!particles.empty()) {
-            Particle& firstParticle = particles[0];
+            Particle firstParticle = particles[0];
+
             //std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", ForceX: " << firstParticle.forceX << ", ForceY: " << firstParticle.forceY << ", VelocityX: " << firstParticle.velocityX << " VelocityY: " << firstParticle.velocityY << std::endl;
         }
 
         // Clear the window
         window.clear();
+
+        // Draw bounding box for the root node with green color
+        drawBoundingBoxes(window, quadtree.root.get(), sf::Vector2f(0.0f, 0.0f), sf::Vector2f(simulationWidth, simulationHeight), true); // Adjust the parameters accordingly
+
 
         // Draw particles
         for (const auto& particle : particles) {
@@ -196,8 +202,7 @@ int main() {
             window.draw(forceVector, 2, sf::Lines);
         }
         */
-        // Draw bounding box for the root node with green color
-        drawBoundingBoxes(window, quadtree.root.get(), sf::Vector2f(0.0f, 0.0f), sf::Vector2f(simulationWidth, simulationHeight), true); // Adjust the parameters accordingly
+        
 
         // Display the window
         window.display();

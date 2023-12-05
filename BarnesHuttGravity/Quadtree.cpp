@@ -7,14 +7,14 @@
 #include <cstdlib>
 #include <ctime>
 #include <random>
-
+#include <omp.h>
 
 
 Quadtree::Quadtree(double x, double y, double width, double height, double theta) : root(new Node(x, y, width, height)), theta(theta) {}
 
 Quadtree::~Quadtree() {}
 
-double forceScale = 100000.0;  // Adjust this scaling factor as needed
+double forceScale = 1000.0;  // Adjust this scaling factor as needed
 
 
 
@@ -144,7 +144,7 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles, double part
     std::mt19937 gen(rd());
     std::uniform_real_distribution<double> randX(simX - simWidth / 2, simX + simWidth / 2);
     std::uniform_real_distribution<double> randY(simY - simHeight / 2, simY + simHeight / 2);
-
+#pragma omp parallel for
     for (int i = 0; i < numParticles; ++i) {
         double px = randX(gen);
         double py = randY(gen);
@@ -177,21 +177,36 @@ void Quadtree::seedParticles(int numParticles, double mass, double simX, double 
 std::vector<Particle> Quadtree::getParticles() {
     std::vector<Particle> particles;
     collectParticles(root.get(), particles);
-    return particles;
+    return particles; 
 }
 
+
+
 void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime) {
-    for (auto& particle : particles) {
+    updateMass(root.get());
+
+#pragma omp parallel for
+    for (int i = 0; i < particles.size(); ++i) {
+        Particle& particle = particles[i];
+
+        // Debug output
+        std::cout << "Particle Before Update - X: " << particle.x << ", Y: " << particle.y << std::endl;
+
         // Update forces in the Quadtree
         root->updateForce(particle, theta, forceScale);
 
+        // Debug output
+        std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
+
         // Update particle position based on velocity
         particle.updatePosition(deltaTime);
-    }
 
-    // Update mass information in the Quadtree
-    updateMass(root.get());
+        // Debug output
+        std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
+    }
 }
+
+
 
 
 
