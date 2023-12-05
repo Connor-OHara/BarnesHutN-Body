@@ -14,11 +14,29 @@ Quadtree::Quadtree(double x, double y, double width, double height, double theta
 
 Quadtree::~Quadtree() {}
 
-double forceScale = 1.0;  // Adjust this scaling factor as needed
+double forceScale = 100000.0;  // Adjust this scaling factor as needed
 
 
 
-
+void Quadtree::updateMass(Node* node) {
+    if (node->isLeaf) {
+        if (node->particle != nullptr) {
+            node->mass = node->particle->mass;
+        }
+        else {
+            node->mass = 0.0;
+        }
+    }
+    else {
+        node->mass = 0.0;
+        for (int i = 0; i < 4; ++i) {
+            if (node->children[i] != nullptr) {
+                updateMass(node->children[i].get());
+                node->mass += node->children[i]->mass;
+            }
+        }
+    }
+}
 
 
 
@@ -50,6 +68,8 @@ void Quadtree::insert(Node* node, Particle* particle) {
 
         insert(node->children[quadrant].get(), particle);
     }
+
+    updateMass(node);
 }
 
 
@@ -162,20 +182,17 @@ std::vector<Particle> Quadtree::getParticles() {
 
 void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime) {
     for (auto& particle : particles) {
-        //std::cout << "Particle before update - X: " << particle.x << ", Y: " << particle.y << std::endl;
-
-
-        //std::cout << "Forces before update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
-
+        // Update forces in the Quadtree
         root->updateForce(particle, theta, forceScale);
 
-        //std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
-
+        // Update particle position based on velocity
         particle.updatePosition(deltaTime);
-
-        //std::cout << "Particle after update - X: " << particle.x << ", Y: " << particle.y << std::endl;
     }
+
+    // Update mass information in the Quadtree
+    updateMass(root.get());
 }
+
 
 
 

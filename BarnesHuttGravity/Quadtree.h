@@ -18,6 +18,7 @@ public:
 
     Quadtree(double x, double y, double width, double height, double theta);
     ~Quadtree();
+    void updateMass(Node* node);
     void insert(Node* node, Particle* particle);
     void generateRandomParticles(Node* node, int numParticles, double particleMass);
     void seedParticles(int numParticles, double mass);
