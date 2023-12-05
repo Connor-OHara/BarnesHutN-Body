@@ -32,7 +32,8 @@ public:
     void updateQuadtree(double deltaTime, int numIterations);
 
     //Get particles after apply forces
-    std::vector<Particle> updateParticlesAfterForces(double deltaTime);
+    void updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime);
+
 
 
     void seedParticles(int numParticles);

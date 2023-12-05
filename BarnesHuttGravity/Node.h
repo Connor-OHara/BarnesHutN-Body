@@ -22,13 +22,14 @@ public:
     static constexpr double G = 6.67428e-11; // Gravitational Constant
     Node(double x, double y, double width, double height);
     ~Node();
-    void updateForce(Particle* target, double theta);
+    void updateForce(Particle& target, double theta, double forceScale);
 
 
     sf::FloatRect getBoundingBox() const {
-        return sf::FloatRect(x - width / 2, y - height / 2, width, height);
+        return sf::FloatRect(static_cast<float>(x - width / 2), static_cast<float>(y - height / 2), static_cast<float>(width), static_cast<float>(height));
+
     }
 
 };
 
-#endif // QUADTREE_H
+#endif // NODE_H

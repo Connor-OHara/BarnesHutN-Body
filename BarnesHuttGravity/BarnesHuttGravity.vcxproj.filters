@@ -24,10 +24,7 @@
     <ClCompile Include="Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BarnesHut.cpp">
+    <ClCompile Include="Quadtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,10 +35,7 @@
     <ClInclude Include="Node.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vect.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BarnesHut.h">
+    <ClInclude Include="Quadtree.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

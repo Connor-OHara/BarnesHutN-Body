@@ -14,7 +14,7 @@ Quadtree::Quadtree(double x, double y, double width, double height, double theta
 
 Quadtree::~Quadtree() {}
 
-
+double forceScale = 1.0;  // Adjust this scaling factor as needed
 
 
 void Quadtree::insert(Node* node, Particle* particle) {
@@ -121,35 +121,14 @@ void Quadtree::generateRandomParticles(Node* node, int numParticles) {
         px = std::max(node->x - node->width / 2, std::min(node->x + node->width / 2, px));
         py = std::max(node->y - node->height / 2, std::min(node->y + node->height / 2, py));
 
-        Particle* particle = new Particle(px, py, 0.1);
+        Particle* particle = new Particle(px, py, .1);
         insert(node, particle);
     }
 }
 
-
-
-
-std::vector<Particle> Quadtree::updateParticlesAfterForces(double deltaTime) {
-    std::vector<Particle> particles;
-
-    // Get particles from the quadtree
-    particles = getParticles();
-
-    // Update forces and positions
-    for (auto& particle : particles) {
-        root->updateForce(&particle, theta);
-        particle.updatePosition(deltaTime);
-    }
-
-    return particles;
-}
-
-
-
 void Quadtree::seedParticles(int numParticles) {
     generateRandomParticles(root.get(), numParticles);
 }
-
 
 std::vector<Particle> Quadtree::getParticles() {
     std::vector<Particle> particles;
@@ -157,15 +136,29 @@ std::vector<Particle> Quadtree::getParticles() {
     return particles;
 }
 
-void Quadtree::updateQuadtree(double deltaTime, int numIterations) {
-    for (int iteration = 0; iteration < numIterations; ++iteration) {
-        // Update forces and positions in the quadtree
-        std::vector<Particle> particles = getParticles();
+void Quadtree::updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime) {
+    // Update forces and positions directly in the provided vector
+    for (auto& particle : particles) {
+        // Debug output for initial forces
+        std::cout << "Initial Forces - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
 
-        for (auto& particle : particles) {
-            root->updateForce(&particle, theta);
-            particle.updatePosition(deltaTime);
-        }
+        // Update forces based on the quadtree
+        root->updateForce(particle, theta, forceScale);
+
+        // Debug output for forces after update
+        std::cout << "Forces after update - X: " << particle.forceX << ", Y: " << particle.forceY << std::endl;
+
+
+
+        // Update position based on the calculated forces
+        particle.updatePosition(deltaTime);
+
+        // Debug output for updated position
+        //std::cout << "PART Updated Velocity - X: " << particle.velocityX << ", Y: " << particle.velocityY << std::endl;
+
+        // Debug output for updated position
+        //std::cout << "PART Updated Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
     }
 }
+
 
