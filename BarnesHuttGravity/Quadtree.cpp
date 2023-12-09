@@ -22,7 +22,7 @@ Quadtree::Quadtree(double x, double y, double width, double height, double theta
 
 Quadtree::~Quadtree() {}
 
-double forceScale = 100.0;  // Adjust this scaling factor as needed - helps with super low movement. meant to help with SFML
+double forceScale = 1.0;  // Adjust this scaling factor as needed - helps with super low movement. meant to help with SFML
 
 
 //Update the mass of the node and all its subnodes
@@ -117,13 +117,14 @@ void Quadtree::split(Node* node, double x, double y, double width, double height
     node->children[2] = std::make_unique<Node>(node->x - subWidth / 2, node->y + subHeight / 2, subWidth, subHeight);
     node->children[3] = std::make_unique<Node>(node->x + subWidth / 2, node->y + subHeight / 2, subWidth, subHeight);
 
-
+    /*
     // Debug output to print node information after splitting
     std::cout << "Splitting Node - Parent: X: " << x << ", Y: " << y << ", Width: " << width << ", Height: " << height << std::endl;
     for (int i = 0; i < 4; ++i) 
     {
         std::cout << "Child " << i << " - X: " << node->children[i]->x << ", Y: " << node->children[i]->y << ", Width: " << node->children[i]->width << ", Height: " << node->children[i]->height << std::endl;
     }
+    */
 }
 
 

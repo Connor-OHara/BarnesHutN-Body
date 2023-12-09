@@ -92,10 +92,10 @@ int main() {
     double simulationY = 0.0;
     double simulationWidth = 1400.0;
     double simulationHeight = 950.0;
-    Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
+    Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, .5);
 
     // Seed the screen with particles
-    quadtree.seedParticles(50, 10000.0, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(50, 10000000.0, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Print initial positions
     std::cout << "Initial Particle positions: ";
@@ -184,7 +184,7 @@ int main() {
         // Update positions of particles
         for (auto& particle : particles) {
             particle.updatePosition(100.0); // You can adjust the deltaTime parameter accordingly
-            std::cout << "Particle Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
+            //std::cout << "Particle Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
         }
 
 
@@ -230,17 +230,17 @@ int main() {
             window.draw(particleShape);
         }
 
-        /*
+        
         // Draw force vectors for each particle
         for (const auto& particle : particles) {
             sf::Vertex forceVector[] = {
                 sf::Vertex(sf::Vector2f(static_cast<float>(particle.x) , static_cast<float>(particle.y))),
-                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x + particle.forceX) * 100000, static_cast<float>(particle.y + particle.forceY)  * 100000))
+                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x + particle.velocityX) * 100, static_cast<float>(particle.y + particle.velocityY) * 100 ))
             };
 
             window.draw(forceVector, 2, sf::Lines);
         }
-        */
+        
 
 
         // Display the window
