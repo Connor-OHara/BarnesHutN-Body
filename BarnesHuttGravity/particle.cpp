@@ -36,7 +36,7 @@ void Particle::updatePosition(double deltaTime)
     forceY = 0.0;
 
     std::cout << "Particle Position After Update - X: " << x << ", Y: " << y << std::endl;
-    std::cout << "Forces After Update - ForceX: " << forceX << ", ForceY: " << forceY << std::endl;
+
 }
 
 

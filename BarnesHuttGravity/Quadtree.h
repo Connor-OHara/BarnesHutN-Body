@@ -36,7 +36,7 @@ public:
     // Add this declaration inside the Quadtree class
     void seedParticles(int numParticles, double mass, double simX, double simY, double simWidth, double simHeight);
 
-    std::vector<Particle> getParticles();
+    std::vector<Particle>& getParticles();
     void updateParticlesAfterForces(std::vector<Particle>& particles, double deltaTime);
     
     sf::FloatRect getBoundingBox() const {

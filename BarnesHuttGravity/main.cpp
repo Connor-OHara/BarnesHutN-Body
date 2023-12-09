@@ -95,15 +95,7 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(2, 1000000000.0, simulationX, simulationY, simulationWidth, simulationHeight);
-
-    // Print initial positions
-    std::cout << "Initial Particle positions: ";
-    for (const auto& particle : quadtree.getParticles()) {
-        std::cout << "X: " << particle.x << ", Y: " << particle.y << " | ";
-    }
-    std::cout << std::endl;
-
+    quadtree.seedParticles(50, 100.0, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -118,7 +110,6 @@ int main() {
 
     // Center the view on the particles initially
     sf::FloatRect boundingBox = quadtree.getBoundingBox();
-
     view.setCenter(boundingBox.left + boundingBox.width / 2, boundingBox.top + boundingBox.height / 2);
     window.setView(view);
 
@@ -129,25 +120,25 @@ int main() {
     std::cout << "Finished building initial conditions: " << quadtree.getParticles().size() << std::endl;
 
     // Main loop
-    while (window.isOpen()) 
+    while (window.isOpen())
     {
         sf::Event event;
-        while (window.pollEvent(event)) 
+        while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) window.close();
-
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+                window.close();
 
             // Handle zoom in and out
-            if (event.type == sf::Event::MouseWheelScrolled) 
+            if (event.type == sf::Event::MouseWheelScrolled)
             {
-                if (event.mouseWheelScroll.delta > 0) 
+                if (event.mouseWheelScroll.delta > 0)
                 {
                     view.zoom(0.9f); // Zoom in
                 }
-                else if (event.mouseWheelScroll.delta < 0) 
+                else if (event.mouseWheelScroll.delta < 0)
                 {
                     view.zoom(1.1f); // Zoom out
                 }
@@ -155,62 +146,38 @@ int main() {
             }
 
             // Handle click-and-drag for panning
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) 
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
             {
                 isDragging = true;
                 lastMousePosition = sf::Mouse::getPosition(window);
             }
-            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) 
+            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
             {
                 isDragging = false;
             }
         }
 
         // Update click-and-drag panning
-        if (isDragging) 
+        if (isDragging)
         {
             sf::Vector2i currentMousePosition = sf::Mouse::getPosition(window);
             sf::Vector2f delta = window.mapPixelToCoords(currentMousePosition) - window.mapPixelToCoords(lastMousePosition);
             view.move(-delta);
             window.setView(view);
-
             lastMousePosition = currentMousePosition;
         }
 
         // Get particles from the quadtree
-        std::vector<Particle> particles = quadtree.getParticles();
+        std::vector<Particle>& particles = quadtree.getParticles();
 
-
-        // Update positions of particles
-        for (auto& particle : particles) {
-            particle.updatePosition(100.0); // You can adjust the deltaTime parameter accordingly
-            std::cout << "Particle Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
-        }
-
-
-
-
-        /*
-        // Print positions of some particles
-        std::cout << "Particle positions: ";
-        for (int i = 0; i < std::min(5, static_cast<int>(particles.size())); ++i) 
-        {
-            std::cout << "Particle " << i << " - X: " << particles[i].x << ", Y: " << particles[i].y << " | ";
-            std::cout << "ParticleF " << i << " - XF: " << particles[i].velocityX << ", YF: " << particles[i].velocityY << " | ";
-        }
-        std::cout << std::endl;
-        */
-        // Assuming particles is a vector of Particle in your main code
+        // Update particles directly from the quadtree's internal storage
         quadtree.updateParticlesAfterForces(particles, 100.0);
 
-
-
         // Print forces on the first particle
-        if (!particles.empty()) 
+        if (!particles.empty())
         {
             Particle firstParticle = particles[0];
-
-            std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", ForceX: " << firstParticle.forceX << ", ForceY: " << firstParticle.forceY << ", VelocityX: " << firstParticle.velocityX << " VelocityY: " << firstParticle.velocityY << std::endl;
+            std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", VelocityX: " << firstParticle.velocityX << " VelocityY: " << firstParticle.velocityY << std::endl;
         }
 
         // Clear the window
@@ -219,36 +186,18 @@ int main() {
         // Draw bounding box for the root node with green color
         drawBoundingBoxes(window, quadtree.root.get(), sf::Vector2f(0.0f, 0.0f), sf::Vector2f(simulationWidth, simulationHeight), true); // Adjust the parameters accordingly
 
-
         // Draw particles
-        for (const auto& particle : particles) 
+        for (const auto& particle : particles)
         {
             // Set particle shape position
             particleShape.setPosition(static_cast<float>(particle.x), static_cast<float>(particle.y));
-
             // Draw the particle
             window.draw(particleShape);
         }
 
-        /*
-        // Draw force vectors for each particle
-        for (const auto& particle : particles) {
-            sf::Vertex forceVector[] = {
-                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x), static_cast<float>(particle.y))),
-                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x + particle.forceX), static_cast<float>(particle.y + particle.forceY)))
-            };
-
-            window.draw(forceVector, 2, sf::Lines);
-        }
-        */
-
-
         // Display the window
         window.display();
     }
-
-
-
 
     return 0;
 }

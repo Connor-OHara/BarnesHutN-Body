@@ -38,15 +38,15 @@ void Node::updateForce(Particle& target, double theta, double forceScale) {
 
     double ratio = width / distance;
 
-    std::cout << "Node - X: " << x << ", Y: " << y << ", Width: " << width << ", Height: " << height << std::endl;
-    std::cout << "Particle - X: " << target.x << ", Y: " << target.y << ", Mass: " << target.mass << std::endl;
-    std::cout << "Distance: " << distance << std::endl;
+    //std::cout << "Node - X: " << x << ", Y: " << y << ", Width: " << width << ", Height: " << height << std::endl;
+    //std::cout << "Particle - X: " << target.x << ", Y: " << target.y << ", Mass: " << target.mass << std::endl;
+    //std::cout << "Distance: " << distance << std::endl;
 
     if (isLeaf || (ratio < theta)) {
         double force = (G * target.mass * mass) / (distance * distance);
-        std::cout << "FORCE: " << force << std::endl;
-        std::cout << "G: " << G << ", Target Mass: " << target.mass << ", Node Mass: " << mass << ", Distance: " << distance << std::endl;
-        std::cout << "dx: " << dx << ", dy: " << dy << ", distance^2: " << distance * distance << std::endl;
+        //std::cout << "FORCE: " << force << std::endl;
+        //std::cout << "G: " << G << ", Target Mass: " << target.mass << ", Node Mass: " << mass << ", Distance: " << distance << std::endl;
+        //std::cout << "dx: " << dx << ", dy: " << dy << ", distance^2: " << distance * distance << std::endl;
 
         // Adjust the force scale
         force *= forceScale;
@@ -56,16 +56,16 @@ void Node::updateForce(Particle& target, double theta, double forceScale) {
         double scaledForceX = std::min(std::max(force * (dx / distance), -maxForce), maxForce);
         double scaledForceY = std::min(std::max(force * (dy / distance), -maxForce), maxForce);
 
-        std::cout << "Scaled Force - X: " << scaledForceX << ", Y: " << scaledForceY << std::endl;
+        //std::cout << "Scaled Force - X: " << scaledForceX << ", Y: " << scaledForceY << std::endl;
 
         // Apply the scaled forces to the target particle
         target.forceX += scaledForceX;
         target.forceY += scaledForceY;
 
-        std::cout << "Force applied Totale :X: " << target.forceX << ", Y: " << target.forceY << std::endl;
+        //std::cout << "Force applied Totale :X: " << target.forceX << ", Y: " << target.forceY << std::endl;
     }
     else {
-        std::cout << "Barnes-Hut criterion not satisfied. Skipping further calculations." << std::endl;
+        //std::cout << "Barnes-Hut criterion not satisfied. Skipping further calculations." << std::endl;
     }
 
     if (!isLeaf) {

@@ -25,7 +25,7 @@ public:
 
     void updatePosition(double deltaTime);
 
-    Particle(double x, double y, double _mass) : x(x), y(y), mass(_mass), forceX(0.0), forceY(0.0), velocityX(0.0), velocityY(0.0) {}
+    Particle(double x, double y, double _mass) : x(x), y(y), mass(_mass), forceX(1.0), forceY(1.0), velocityX(1.0), velocityY(1.0) {}
 
 
 
