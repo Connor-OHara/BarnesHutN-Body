@@ -1,3 +1,12 @@
+/*
+Author: Connor O'Hara
+Class: ECE4122
+Last Date Modified: 12/8/23
+Description:
+Header file for our Node object, which represents a sector of space in the Quadtree
+*/
+
+
 #ifndef NODE_H
 #define NODE_H
 
@@ -22,7 +31,8 @@ public:
 
     void updateForce(Particle& target, double theta, double forceScale);
 
-    sf::FloatRect getBoundingBox() const {
+    sf::FloatRect getBoundingBox() const 
+    {
         return sf::FloatRect(static_cast<float>(x - width / 2), static_cast<float>(y - height / 2), static_cast<float>(width), static_cast<float>(height));
     }
 };

@@ -20,11 +20,13 @@
 #include "Node.h"
 #include "Particle.h"
 #include <iostream>
+#include "Quadtree.h"
 
 
-
+//This draws our boxes in our tree
 void drawBoundingBoxes(sf::RenderWindow& window, Node* node, sf::Vector2f parentCenter = sf::Vector2f(0.0f, 0.0f), sf::Vector2f parentSize = sf::Vector2f(0.0f, 0.0f), bool isRoot = false) {
-    if (node) {
+    if (node) 
+    {
         // Draw the bounding box for the current node
         sf::FloatRect boundingBox = node->getBoundingBox();
         sf::RectangleShape rect(sf::Vector2f(boundingBox.width, boundingBox.height));
@@ -32,11 +34,13 @@ void drawBoundingBoxes(sf::RenderWindow& window, Node* node, sf::Vector2f parent
         rect.setFillColor(sf::Color::Transparent);
 
         // Set the outline color
-        if (isRoot) {
+        if (isRoot) 
+        {
             // Root node color (green border)
             rect.setOutlineColor(sf::Color::Green);
         }
-        else {
+        else 
+        {
             // Non-root nodes color (blue border)
             rect.setOutlineColor(sf::Color::Blue);
         }
@@ -45,11 +49,14 @@ void drawBoundingBoxes(sf::RenderWindow& window, Node* node, sf::Vector2f parent
         window.draw(rect);
 
         // Recursively draw bounding boxes for children
-        for (int i = 0; i < 4; ++i) {
-            if (node->children[i]) {
+        for (int i = 0; i < 4; ++i) 
+        {
+            if (node->children[i]) 
+            {
                 // Calculate child position
                 sf::Vector2f childPosition;
-                switch (i) {
+                switch (i) 
+                {
                 case 0: // Top left
                     childPosition = sf::Vector2f(boundingBox.left, boundingBox.top);
                     break;
@@ -88,7 +95,15 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(50, 100000000, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(2, 1000000000.0, simulationX, simulationY, simulationWidth, simulationHeight);
+
+    // Print initial positions
+    std::cout << "Initial Particle positions: ";
+    for (const auto& particle : quadtree.getParticles()) {
+        std::cout << "X: " << particle.x << ", Y: " << particle.y << " | ";
+    }
+    std::cout << std::endl;
+
 
     // Create SFML window
     sf::RenderWindow window(sf::VideoMode(1400, 950), "Barnes-Hut N-Body Simulation");
@@ -114,9 +129,11 @@ int main() {
     std::cout << "Finished building initial conditions: " << quadtree.getParticles().size() << std::endl;
 
     // Main loop
-    while (window.isOpen()) {
+    while (window.isOpen()) 
+    {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event)) 
+        {
             if (event.type == sf::Event::Closed)
                 window.close();
 
@@ -124,28 +141,34 @@ int main() {
 
 
             // Handle zoom in and out
-            if (event.type == sf::Event::MouseWheelScrolled) {
-                if (event.mouseWheelScroll.delta > 0) {
+            if (event.type == sf::Event::MouseWheelScrolled) 
+            {
+                if (event.mouseWheelScroll.delta > 0) 
+                {
                     view.zoom(0.9f); // Zoom in
                 }
-                else if (event.mouseWheelScroll.delta < 0) {
+                else if (event.mouseWheelScroll.delta < 0) 
+                {
                     view.zoom(1.1f); // Zoom out
                 }
                 window.setView(view);
             }
 
             // Handle click-and-drag for panning
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) 
+            {
                 isDragging = true;
                 lastMousePosition = sf::Mouse::getPosition(window);
             }
-            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) 
+            {
                 isDragging = false;
             }
         }
 
         // Update click-and-drag panning
-        if (isDragging) {
+        if (isDragging) 
+        {
             sf::Vector2i currentMousePosition = sf::Mouse::getPosition(window);
             sf::Vector2f delta = window.mapPixelToCoords(currentMousePosition) - window.mapPixelToCoords(lastMousePosition);
             view.move(-delta);
@@ -158,24 +181,36 @@ int main() {
         std::vector<Particle> particles = quadtree.getParticles();
 
 
+        // Update positions of particles
+        for (auto& particle : particles) {
+            particle.updatePosition(100.0); // You can adjust the deltaTime parameter accordingly
+            std::cout << "Particle Position - X: " << particle.x << ", Y: " << particle.y << std::endl;
+        }
+
+
+
+
+        /*
         // Print positions of some particles
         std::cout << "Particle positions: ";
-        for (int i = 0; i < std::min(5, static_cast<int>(particles.size())); ++i) {
+        for (int i = 0; i < std::min(5, static_cast<int>(particles.size())); ++i) 
+        {
             std::cout << "Particle " << i << " - X: " << particles[i].x << ", Y: " << particles[i].y << " | ";
             std::cout << "ParticleF " << i << " - XF: " << particles[i].velocityX << ", YF: " << particles[i].velocityY << " | ";
         }
         std::cout << std::endl;
-
+        */
         // Assuming particles is a vector of Particle in your main code
         quadtree.updateParticlesAfterForces(particles, 100.0);
 
 
 
         // Print forces on the first particle
-        if (!particles.empty()) {
+        if (!particles.empty()) 
+        {
             Particle firstParticle = particles[0];
 
-            //std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", ForceX: " << firstParticle.forceX << ", ForceY: " << firstParticle.forceY << ", VelocityX: " << firstParticle.velocityX << " VelocityY: " << firstParticle.velocityY << std::endl;
+            std::cout << "First Particle Position - X: " << firstParticle.x << ", Y: " << firstParticle.y << ", ForceX: " << firstParticle.forceX << ", ForceY: " << firstParticle.forceY << ", VelocityX: " << firstParticle.velocityX << " VelocityY: " << firstParticle.velocityY << std::endl;
         }
 
         // Clear the window
@@ -186,7 +221,8 @@ int main() {
 
 
         // Draw particles
-        for (const auto& particle : particles) {
+        for (const auto& particle : particles) 
+        {
             // Set particle shape position
             particleShape.setPosition(static_cast<float>(particle.x), static_cast<float>(particle.y));
 

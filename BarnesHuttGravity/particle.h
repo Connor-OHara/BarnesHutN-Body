@@ -1,9 +1,17 @@
+/*
+Author: Connor O'Hara
+Class: ECE4122
+Last Date Modified: 12/8/23
+Description:
+Header file for the Particle, which represents a star, planet or other object in our system
+*/
+
 #pragma once
 
 #include <cmath>
 #include <iostream>
 
-
+//Define our particle, and give it a shell for its standard functions and attributes
 class Particle {
 public:
     double x;
@@ -23,7 +31,8 @@ public:
 
 
     // Ensure that the distance is never zero to avoid division by zero
-    double getDistance(const Particle& other) const {
+    double getDistance(const Particle& other) const 
+    {
         double dx = other.x - x;
         double dy = other.y - y;
         return std::max(std::sqrt(dx * dx + dy * dy), 1e-6);
