@@ -16,8 +16,8 @@ constexpr double damping = 0.99; // Add damping as a constant
 //update our particle over some given change in time dT
 void Particle::updatePosition(double deltaTime)
 {
-    std::cout << "Particle Position Before Update - X: " << x << ", Y: " << y << std::endl;
-    std::cout << "Forces Before Update - ForceX: " << forceX << ", ForceY: " << forceY << std::endl;
+    //std::cout << "Particle Position Before Update - X: " << x << ", Y: " << y << std::endl;
+    //std::cout << "Forces Before Update - ForceX: " << forceX << ", ForceY: " << forceY << std::endl;
 
     // Update velocity using forces
     velocityX += (forceX / mass) * deltaTime;
@@ -35,8 +35,8 @@ void Particle::updatePosition(double deltaTime)
     forceX = 0.0;
     forceY = 0.0;
 
-    std::cout << "Particle Position After Update - X: " << x << ", Y: " << y << std::endl;
-    std::cout << "Forces After Update - ForceX: " << forceX << ", ForceY: " << forceY << std::endl;
+    //std::cout << "Particle Position After Update - X: " << x << ", Y: " << y << std::endl;
+    //std::cout << "Forces After Update - ForceX: " << forceX << ", ForceY: " << forceY << std::endl;
 }
 
 

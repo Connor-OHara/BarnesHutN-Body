@@ -95,7 +95,7 @@ int main() {
     Quadtree quadtree(simulationX, simulationY, simulationWidth, simulationHeight, 0.1);
 
     // Seed the screen with particles
-    quadtree.seedParticles(2, 1000000000.0, simulationX, simulationY, simulationWidth, simulationHeight);
+    quadtree.seedParticles(50, 10000.0, simulationX, simulationY, simulationWidth, simulationHeight);
 
     // Print initial positions
     std::cout << "Initial Particle positions: ";
@@ -234,8 +234,8 @@ int main() {
         // Draw force vectors for each particle
         for (const auto& particle : particles) {
             sf::Vertex forceVector[] = {
-                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x), static_cast<float>(particle.y))),
-                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x + particle.forceX), static_cast<float>(particle.y + particle.forceY)))
+                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x) , static_cast<float>(particle.y))),
+                sf::Vertex(sf::Vector2f(static_cast<float>(particle.x + particle.forceX) * 100000, static_cast<float>(particle.y + particle.forceY)  * 100000))
             };
 
             window.draw(forceVector, 2, sf::Lines);

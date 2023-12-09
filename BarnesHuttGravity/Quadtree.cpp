@@ -22,7 +22,7 @@ Quadtree::Quadtree(double x, double y, double width, double height, double theta
 
 Quadtree::~Quadtree() {}
 
-double forceScale = 1000.0;  // Adjust this scaling factor as needed - helps with super low movement. meant to help with SFML
+double forceScale = 100.0;  // Adjust this scaling factor as needed - helps with super low movement. meant to help with SFML
 
 
 //Update the mass of the node and all its subnodes
